@@ -15,6 +15,8 @@ main = toJSONFilter blockFormatter
 
 -- | Select the desired format output then process it.
 blockFormatter :: Maybe Format -> Block -> Block
+blockFormatter  Nothing               (CodeBlock attrs content) = -- debugging mode
+    codeFormatter "text" attrs content
 blockFormatter (Just (Format format)) (CodeBlock attrs content)
     | isHaskell attrs = codeFormatter format attrs content
     | otherwise = CodeBlock attrs content
