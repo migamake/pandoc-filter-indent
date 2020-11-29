@@ -7,8 +7,9 @@ import           Text.Pandoc.Definition ()
 import           Data.String (fromString, IsString)
 import           Data.Text (Text)
 import qualified Data.Text as T
+import Debug.Trace(trace)
 
-import Filter(findColumns)
+import Filter
 
 main :: IO ()
 main = toJSONFilter blockFormatter
@@ -26,7 +27,8 @@ blockFormatter _ x = x
 -- | Select formatter
 codeFormatter :: Text -> Attr -> Text -> Block
 codeFormatter format attrs content | True =
-        CodeBlock attrs $ T.pack $ show $ findColumns content
+        trace ("Output format: " <> show format) $
+        CodeBlock attrs $ T.pack $ show $ filterCodeBlock content
     {-
     | format == (fromString "latex") =
         RawBlock (Format "latex") (renderLatex content)
