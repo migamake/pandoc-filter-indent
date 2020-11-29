@@ -1,15 +1,20 @@
 {-# LANGUAGE OverloadedStrings     #-}
 {-# LANGUAGE PartialTypeSignatures #-}
+{-# LANGUAGE TemplateHaskell       #-}
 {-# LANGUAGE ViewPatterns          #-}
 -- | Common token representation used.
-module Token(MyTok(..), MyLoc(..), Tokenized) where
+module Token(MyTok(..), MyLoc(..), Tokenized, line, col) where
 
 import Data.Text(Text)
+import Data.Tuple.Optics
+import Optics.TH
 
 -- * Common tokens and locations
 -- Location is just line and column
-data MyLoc = MyLoc { line, col :: Int }
+data MyLoc = MyLoc { _line, _col :: Int }
   deriving (Eq, Ord, Show)
+
+makeLenses ''MyLoc
 
 -- | Token just classifies to blank, operator, and the style class
 data MyTok =

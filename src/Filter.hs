@@ -1,6 +1,8 @@
 {-# LANGUAGE OverloadedStrings     #-}
 {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE ViewPatterns          #-}
+{-# LANGUAGE TypeSynonymInstances  #-}
+{-# LANGUAGE FlexibleInstances     #-}
 module Filter where
 
 import Text.Pandoc.JSON
@@ -9,11 +11,13 @@ import Data.Function(on)
 import Data.String (fromString, IsString)
 import Data.Text (Text)
 import Data.List(groupBy, sortBy)
-import Debug.Trace(trace)
 import Prelude hiding(getLine)
+import Optics.Core
+import Data.Tuple.Optics
 
 import Token
 import Token.Haskell
+import Tuples
 
 data Align =
     ALeft
@@ -24,6 +28,9 @@ data Align =
 type Unanalyzed = (MyTok, MyLoc, Maybe Int,              Text)
 type Aligned    = (MyTok, MyLoc, Maybe Int, Maybe Align, Text)
 
+-- FIXME:
+-- number the columns with `Align`
+-- print it to the output
 findColumns :: Text -> _
 findColumns input@(tokenizer -> Nothing    ) = error "Haskell tokenizer failed."
 findColumns       (tokenizer -> Just tokens) =
@@ -34,16 +41,14 @@ findColumns       (tokenizer -> Just tokens) =
     $ concat
     $ map addLineIndent
     $ grouping getLine tokens
-  where
-    compareLine = (==) `on` getLine
-    getLineCol (_, MyLoc line col, _, _, _) = (line, col)
-    getCol  (_, MyLoc _  col, _, _) = col
 
-getCol  (_, MyLoc _  col, _) = col
-getLine (_, MyLoc line _, _) = line
+getLineCol x = (getLine x, getCol x)
+
+getCol  = view $ _2 % line
+getLine = view $ _2 % line
 
 markBoundaries :: [Unanalyzed] -> [Aligned]
-markBoundaries = fmap markIndent
+markBoundaries = map markIndent
                . concat
                . map alignBlock
                . blocks
@@ -61,13 +66,14 @@ withAlign :: Maybe Align -> Unanalyzed -> Aligned
 withAlign a (myTok, myLoc, indent, myTxt) = (myTok, myLoc, indent, a, myTxt)
 
 alignBlock :: [Unanalyzed] -> [Aligned]
-alignBlock [a]                            = withAlign   Nothing      <$> [a]
+alignBlock [a]                            = withAlign  Nothing       <$> [a]
 alignBlock opList | all isOperator opList = withAlign (Just ACenter) <$> opList
   where
     isOperator (TOperator, _, _, _) = True
     isOperator  _                   = False
 alignBlock aList                          = withAlign (Just ALeft  ) <$> aList
 
+{-
 -- | Detect uninterrupted stretches that cover consecutive columns.
 blocks :: [Unanalyzed] -> [[Unanalyzed]]
 blocks (b:bs) = go [b] bs
@@ -82,6 +88,19 @@ blocks (b:bs) = go [b] bs
         reverse currentBlock:go [b] bs
     go currentBlock                             []                          =
        [reverse currentBlock]
+ -}
+
+-- | Detect uninterrupted stretches that cover consecutive columns.
+blocks :: [Unanalyzed] -> [[Unanalyzed]]
+blocks = groupBy consecutive
+  where
+    consecutive :: Unanalyzed -> Unanalyzed -> Bool
+    consecutive (getLine -> lastLine) (getLine -> nextLine) | nextLine - lastLine == 1 = True
+      where
+        getLine (_, MyLoc line _, _, _) = line
+    consecutive  _                    _                                            = False
+
+
 
 --withGroups k f = map k . grouping k
 

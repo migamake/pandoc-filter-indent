@@ -7,11 +7,10 @@ build() {
   cat out.md
 }
 
+build
 if [ "$1" == "--watch" ]; then 
   while inotifywait src/*.hs app/*.hs src/*/*.hs; do
     build;
   done;
-else
-  build
 fi;
 

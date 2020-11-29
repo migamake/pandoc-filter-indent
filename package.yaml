@@ -26,6 +26,8 @@ dependencies:
 - blaze-html == 0.9.1.2
 - HaTeX
 - pandoc-types
+- optics-core
+- optics-th
 
 library:
   source-dirs: src
