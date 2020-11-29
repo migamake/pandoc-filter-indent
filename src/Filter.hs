@@ -3,6 +3,7 @@
 {-# LANGUAGE ViewPatterns          #-}
 {-# LANGUAGE TypeSynonymInstances  #-}
 {-# LANGUAGE FlexibleInstances     #-}
+{-# LANGUAGE FlexibleContexts      #-}
 module Filter where
 
 import Text.Pandoc.JSON
@@ -25,8 +26,12 @@ data Align =
   deriving (Eq, Ord, Show)
 
 -- | Records tokenized and converted to common token format.
-type Unanalyzed = (MyTok, MyLoc, Maybe Int,              Text)
-type Aligned    = (MyTok, MyLoc, Maybe Int, Maybe Align, Text)
+type Unanalyzed = (MyTok, MyLoc, Text, Maybe Int             )
+type Aligned    = (MyTok, MyLoc, Text, Maybe Int, Maybe Align)
+
+getCol, getLine :: Field2 a a MyLoc MyLoc => a -> Int
+getCol  = view $ _2 % col
+getLine = view $ _2 % line
 
 -- FIXME:
 -- number the columns with `Align`
@@ -44,9 +49,6 @@ findColumns       (tokenizer -> Just tokens) =
 
 getLineCol x = (getLine x, getCol x)
 
-getCol  = view $ _2 % line
-getLine = view $ _2 % line
-
 markBoundaries :: [Unanalyzed] -> [Aligned]
 markBoundaries = map markIndent
                . concat
@@ -58,12 +60,13 @@ markBoundaries = map markIndent
 
 -- | If first indented token is yet unmarked, mark it as boundary.
 markIndent :: Aligned -> Aligned
-markIndent (myTok, myLoc@(MyLoc _ col), Just indent, Nothing,    txt) | indent == col =
-           (myTok, myLoc              , Just indent, Just ALeft, txt)
+markIndent (myTok, myLoc@(MyLoc _ col), txt, Just indent, Nothing   ) | indent == col =
+           (myTok, myLoc              , txt, Just indent, Just ALeft)
 markIndent other                                                               = other
 
+-- FIXME: replace with typed `annex`
 withAlign :: Maybe Align -> Unanalyzed -> Aligned
-withAlign a (myTok, myLoc, indent, myTxt) = (myTok, myLoc, indent, a, myTxt)
+withAlign a (myTok, myLoc, indent, myTxt) = (myTok, myLoc, indent, myTxt, a)
 
 alignBlock :: [Unanalyzed] -> [Aligned]
 alignBlock [a]                            = withAlign  Nothing       <$> [a]
@@ -104,7 +107,10 @@ blocks = groupBy consecutive
 
 --withGroups k f = map k . grouping k
 
-grouping    :: _
+grouping    :: Ord k
+            => (   a -> k)
+            ->    [a]
+            ->   [[a]]
 grouping key = groupBy ((==)    `on` key)
              . sortBy  (compare `on` key)
 
@@ -118,5 +124,6 @@ addLineIndent aLine = addIndent indentColumn <$> aLine
     notBlank        _                           = True
     extractColumn  []                           = Nothing
     extractColumn  ((_,   MyLoc line col, _):_) = Just col
-    addIndent indentCol (tok, myLoc, txt)       = (tok, myLoc, indentCol, txt)
+    -- FIXME: use Tuples.annex
+    addIndent indentCol (tok, myLoc, txt)       = (tok, myLoc, txt, indentCol)
 
