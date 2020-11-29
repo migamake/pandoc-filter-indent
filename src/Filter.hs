@@ -64,9 +64,8 @@ markIndent (myTok, myLoc@(MyLoc _ col), txt, Just indent, Nothing   ) | indent =
            (myTok, myLoc              , txt, Just indent, Just ALeft)
 markIndent other                                                               = other
 
--- FIXME: replace with typed `annex`
 withAlign :: Maybe Align -> Unanalyzed -> Aligned
-withAlign a (myTok, myLoc, indent, myTxt) = (myTok, myLoc, indent, myTxt, a)
+withAlign  = flip annex
 
 alignBlock :: [Unanalyzed] -> [Aligned]
 alignBlock [a]                            = withAlign  Nothing       <$> [a]
@@ -103,8 +102,6 @@ blocks = groupBy consecutive
         getLine (_, MyLoc line _, _, _) = line
     consecutive  _                    _                                            = False
 
-
-
 --withGroups k f = map k . grouping k
 
 grouping    :: Ord k
@@ -116,7 +113,7 @@ grouping key = groupBy ((==)    `on` key)
 
 -- | Add line indent to each token in line.
 addLineIndent :: [Tokenized] -> [Unanalyzed]
-addLineIndent aLine = addIndent indentColumn <$> aLine
+addLineIndent aLine = (`annex` indentColumn) <$> aLine
   where
     indentColumn :: Maybe Int
     indentColumn = extractColumn $ filter notBlank aLine
@@ -124,6 +121,4 @@ addLineIndent aLine = addIndent indentColumn <$> aLine
     notBlank        _                           = True
     extractColumn  []                           = Nothing
     extractColumn  ((_,   MyLoc line col, _):_) = Just col
-    -- FIXME: use Tuples.annex
-    addIndent indentCol (tok, myLoc, txt)       = (tok, myLoc, txt, indentCol)
 
