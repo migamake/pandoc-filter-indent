@@ -1,2 +1,8 @@
+# Stack
 .stack-work/
+stack.yaml.lock
+# Vim backups
 *~
+# VS Code
+.vscode
+
