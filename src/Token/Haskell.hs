@@ -37,6 +37,7 @@ locLine (Loc startLineNo startColNo _ _) = startLineNo
 locCol  (Loc startLineNo startColNo _ _) = startColNo
 
 -- | Split tokens into one blank per line.
+-- TESTME: assures that no token has '\n' before the end of text.
 splitTokens :: [(MyTok, MyLoc, Text)] -> [(MyTok, MyLoc, Text)]
 splitTokens = mconcat
             . fmap splitter
@@ -57,6 +58,11 @@ splitTokens = mconcat
     splitter  other             = [other]
 
 -- | Restore locations
+-- TESTME: test
+-- 1. Without newlines should return a list of indices up to length
+-- 2. Of the same length as number of tokens
+-- 3. With newlines should return line indices up to number of lines.
+-- 4. Same for a list of lists of words without newlines joined as lines
 restoreLocations :: [(a, Text)] -> [(a, MyLoc, Text)]
 restoreLocations = go 1 1
   where
@@ -65,7 +71,7 @@ restoreLocations = go 1 1
         (tok, MyLoc line col, txt):go newLine newCol ls
       where
         newLine  = line + lineIncr
-        lineIncr = T.length (T.filter (=='\n') txt)
+        lineIncr = T.length $ T.filter (=='\n') txt
         newCol  | lineIncr == 0 = col + T.length txt
                 | otherwise     = (+1)
                                 $ T.length
