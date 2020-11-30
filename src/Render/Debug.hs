@@ -1,0 +1,70 @@
+{-# LANGUAGE AllowAmbiguousTypes   #-}
+{-# LANGUAGE OverloadedStrings     #-}
+{-# LANGUAGE PartialTypeSignatures #-}
+{-# LANGUAGE TupleSections         #-}
+{-# LANGUAGE FlexibleInstances     #-}
+{-# LANGUAGE FlexibleContexts      #-}
+module Render.Debug(render) where
+
+import Data.Function(on)
+import Data.String (fromString, IsString)
+import Data.Text (Text)
+import qualified Data.Text as T
+import Data.List(groupBy, sortBy, sort, group)
+import Data.Maybe(fromMaybe)
+import Prelude hiding(getLine)
+import Optics.Core
+
+import FindColumns
+import Alignment
+import Util
+
+insertAt       :: Show a => Int -> a -> [a] -> [a]
+insertAt i e ls = case maybeInsertAt i e ls of
+                    Nothing -> error $ "Failed in insertAt " <> show i <> " " <> show e <> " " <> show ls
+                    Just r  -> r
+
+maybeInsertAt :: Int -> a -> [a] -> Maybe [a]
+maybeInsertAt 0 e    ls  = pure $ e:ls
+maybeInsertAt i e (l:ls) = (l:) <$> maybeInsertAt (i-1) e ls
+maybeInsertAt i e    []  = Nothing
+
+render :: [Processed] -> Text
+render ps = T.concat $ go ps
+  where
+    -- | Table columns between starting point of this segment and the next.
+    lastColumn  = maximum tColumns + 1
+    -- | Translates indices of alignment/table columns to text columns.
+    tColumns :: [Int]
+    tColumns = fst <$> tableColumns ps
+    go  []        = []
+    go (tok:toks) = alignMarker:textWithMarkers tColumns nextCol tok
+                               :go toks
+      where
+        nextCol = case toks of
+                    []       -> lastColumn
+                    (next:_) -> getCol next
+        alignMarker :: Text
+        alignMarker  = case view alignPos tok of
+                         Nothing           -> ""
+                         Just (ACenter, _) -> "^"
+                         Just (ALeft,   _) -> "|"
+
+-- | Text content with markers for markers inside it.
+textWithMarkers tColumns nextCol tok = 
+    T.pack $ insertMarkers unaccountedMarkers $ T.unpack $ view textContent tok
+  where
+    insertMarkers []   txt = txt
+    insertMarkers mrks txt = --(\result -> trace ("insertMarkers " <> show mrks <> " " <> show txt <> " => " <> result) result)
+                             foldr insertMarker txt
+                           $ -- trace (show unaccountedMarkers)
+                             mrks
+
+    insertMarker index = insertAt index '.'
+    unaccountedMarkers = fmap (-getCol tok+)
+                       $ withoutKnownMarker
+                       $ columnsBetween (getCol tok) nextCol
+    withoutKnownMarker | Just _ <- view alignPos tok = safeTail
+                       | otherwise                   = id
+    columnsBetween :: Int -> Int -> [Int]
+    columnsBetween colA colB = filter (\c -> c >= colA && c < colB) tColumns
