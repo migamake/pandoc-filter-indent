@@ -21,8 +21,9 @@ import Token
 
 -- * Haskell tokenizer frontend
 tokenizer :: Text -> Maybe [(MyTok, MyLoc, Text)]
-tokenizer  = fmap restoreLocations
-           . fmap (first haskellTok <$>)
+tokenizer  = fmap ( splitTokens
+                  . restoreLocations
+                  . (first haskellTok <$>) )
            . tokenizeHaskell
 
 haskellTok SymbolTok  = TOperator
@@ -34,6 +35,26 @@ haskellTok t          = TOther
 
 locLine (Loc startLineNo startColNo _ _) = startLineNo
 locCol  (Loc startLineNo startColNo _ _) = startColNo
+
+-- | Split tokens into one blank per line.
+splitTokens :: [(MyTok, MyLoc, Text)] -> [(MyTok, MyLoc, Text)]
+splitTokens = mconcat
+            . fmap splitter
+  where
+    splitter :: (MyTok, MyLoc, Text) -> [(MyTok, MyLoc, Text)]
+    splitter (TBlank, loc@(MyLoc line _), txt) | T.filter (=='\n') txt /= "" =
+        withLocs withNewLines
+      where
+        split, withNewLines :: [Text]
+        split = T.lines txt
+        withNewLines = fmap (<>"\n") (init split)
+                    <> [last split]
+        withLocs :: [Text] -> [(MyTok, MyLoc, Text)]
+        withLocs (l:ls) = (TBlank, loc, l)
+                        : zipWith mkEntry [line+1..] ls
+        mkEntry :: Int -> Text -> (MyTok, MyLoc, Text)
+        mkEntry i t = (TBlank, MyLoc i 1, t)
+    splitter  other             = [other]
 
 -- | Restore locations
 restoreLocations :: [(a, Text)] -> [(a, MyLoc, Text)]

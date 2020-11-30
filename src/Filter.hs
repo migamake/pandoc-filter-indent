@@ -41,7 +41,7 @@ render ::  Text       -- ^ Format string
        ->  Attr       -- ^ Attributes
        -> [Processed] -- ^ Data about alignment
        ->  Block
-render "text" attrs aligned = trace "Rendering as text" $ CodeBlock attrs $ renderText aligned
+render "text" attrs aligned = trace "Rendering as text" $ CodeBlock attrs $ renderText2 aligned
 render other  attrs aligned = CodeBlock attrs $ T.pack $ show aligned
 
 -- | Find colspan parameters
