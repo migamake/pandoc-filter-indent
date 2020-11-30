@@ -1,9 +1,12 @@
 #!/bin/bash
 
 build() {
+  FILTER_EXE=$(stack path --local-install-root)/bin/filter-indent;
   stack build && \
   stack run < test/example.json > out.json &&
-  pandoc -f json -t markdown out.json -o out.md &&
+  pandoc -f json -t markdown  out.json -o out.md &&
+  pandoc --standalone -t latex test/example.md -o out.tex --filter "${FILTER_EXE}" &&
+  pandoc              -t pdf   test/example.md -o out.pdf --filter "${FILTER_EXE}" &&
   cat out.md
 }
 

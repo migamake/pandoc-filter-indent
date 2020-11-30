@@ -20,10 +20,11 @@ import Alignment
 type TextWithColSpan = (Text, Int, Align)
 
 -- | Find colspan parameters
-colspans   :: [Processed] -> [TextWithColSpan]
-colspans ps = fmap extractText
-            $ addColSpans
-            $ groupBy sameColSpan
+colspans   :: [Processed] -> [[TextWithColSpan]]
+colspans ps = fmap (fmap extractText
+                   . addColSpans
+                   . groupBy sameColSpan)
+            $ groupBy ((==) `on` getLine)
             $ sortBy (compare `on` getLineCol) ps
   where
     maxCol :: Int
