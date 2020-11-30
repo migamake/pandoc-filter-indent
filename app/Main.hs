@@ -12,6 +12,7 @@ import Debug.Trace(trace)
 import Token.Haskell
 import GHC.SyntaxHighlighter
 import Filter
+import FindColumns
 
 main :: IO ()
 main = toJSONFilter blockFormatter
@@ -32,7 +33,7 @@ codeFormatter :: Text -> Attr -> Text -> Block
 codeFormatter format attrs content | True =
         trace ("Output format: " <> show format) $
         (render format attrs $ filterCodeBlock content)
-        --CodeBlock attrs $ T.pack $ show $ tokenizer content
+        --CodeBlock attrs $ T.pack $ show $ fmap findColumns $ tokenizer content
         --CodeBlock attrs $ T.pack $ show $ tokenizer content
     {-
     | format == (fromString "latex") =

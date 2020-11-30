@@ -21,12 +21,18 @@ import Token.Haskell
 import Tuples
 import Alignment
 import Util
+import Debug.Trace
 
 -- | Records tokenized and converted to common token format.
 type Unanalyzed = (MyTok, MyLoc, Text, Maybe Int             )
 
 -- | Records aligned, but without column numbers yet.
-type Aligned   = (MyTok, MyLoc, Text, Maybe Int, Maybe Align)
+type Aligned   = (MyTok       -- token type
+                 ,MyLoc       -- text start location
+                 ,Text        -- text content
+                 ,Maybe Int   -- indent in this column
+                 ,Maybe Align -- alignment
+                 )
 
 -- * Definitions of fields accessible at many stages
 getCol, getLine :: Field2 a a MyLoc MyLoc => a -> Int
@@ -57,7 +63,9 @@ getLineCol x = (getLine x, getCol x)
 markBoundaries :: [Unanalyzed] -> [Aligned]
 markBoundaries = map markIndent
                . concat
+               . (\b -> trace ("ALIGNED: " <> show b) b)
                . map alignBlock
+               . (\b -> trace ("BLOCKS: " <> show b) b)
                . blocks
                . sortBy (compare `on` getLine)
   where
@@ -65,8 +73,10 @@ markBoundaries = map markIndent
 
 -- | If first indented token is yet unmarked, mark it as boundary.
 markIndent :: Aligned -> Aligned
-markIndent (myTok, myLoc@(MyLoc _ col), txt, Just indent, Nothing   ) | indent == col =
-           (myTok, myLoc              , txt, Just indent, Just ALeft)
+markIndent (TBlank, myLoc@(MyLoc _ 1  ), txt, Just indent, _) =
+           (TBlank, myLoc              , txt, Just indent, Just AIndent)
+markIndent (myTok,  myLoc@(MyLoc _ col), txt, Just indent, _) | indent == col =
+           (myTok,  myLoc              , txt, Just indent, Just ALeft)
 markIndent other                                                               = other
 
 withAlign :: Maybe Align -> Unanalyzed -> Aligned
@@ -109,34 +119,24 @@ tableColumns  =
     hasAlignment (_, Nothing) = False
     hasAlignment (_, Just _)  = True
 
-{-
+getIndent = view _4
+
 -- | Detect uninterrupted stretches that cover consecutive columns.
+--   NOTE: replacing with `groupBy` would not work due to comparison of consecutive only
 blocks :: [Unanalyzed] -> [[Unanalyzed]]
 blocks (b:bs) = go [b] bs
   where
-    getLine (_, MyLoc line _, _, _) = line
-    go currentBlock@(getLine . head -> lastCol) (b@(getLine -> nextCol):bs)
-      | nextCol - lastCol == 1 = -- add ignoring of unindented (Nothing)
+    go currentBlock@((getIndent -> Nothing):_) (b@(getLine -> nextLine):bs) =
         go (b:currentBlock)         bs
-    go (c:currentBlock)                         (blank@(_,_,Nothing, _):bs) =
+    go currentBlock@((getLine -> lastLine):_) (b@(getLine -> nextLine):bs)
+      | nextLine - lastLine == 1 = -- add ignoring of unindented (Nothing)
+        go (b:currentBlock)         bs
+    go (c:currentBlock)                         (blank@(getIndent -> Nothing):bs) =
         go (c:blank:currentBlock)   bs
     go currentBlock                             (b                     :bs) =
         reverse currentBlock:go [b] bs
     go currentBlock                             []                          =
        [reverse currentBlock]
- -}
-
--- | Detect uninterrupted stretches that cover consecutive columns.
-blocks :: [Unanalyzed] -> [[Unanalyzed]]
-blocks = groupBy consecutive
-  where
-    consecutive :: Unanalyzed -> Unanalyzed -> Bool
-    consecutive (getLine -> lastLine) (getLine -> nextLine) | nextLine - lastLine == 1 = True
-      where
-        getLine (_, MyLoc line _, _, _) = line
-    consecutive  _                    _                                            = False
-
---withGroups k f = map k . grouping k
 
 -- | Add line indent to each token in line.
 addLineIndent :: [Tokenized] -> [Unanalyzed]

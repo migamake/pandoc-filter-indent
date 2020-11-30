@@ -46,9 +46,9 @@ render ps = T.concat $ go ps
                     (next:_) -> getCol next
         alignMarker :: Text
         alignMarker  = case view alignPos tok of
-                         Nothing           -> ""
                          Just (ACenter, _) -> "^"
                          Just (ALeft,   _) -> "|"
+                         otherwise         -> ""
 
 -- | Text content with markers for markers inside it.
 textWithMarkers tColumns nextCol tok = 

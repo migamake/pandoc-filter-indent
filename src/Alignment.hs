@@ -17,6 +17,7 @@ import Tuples
 data Align =
     ALeft
   | ACenter
+  | AIndent -- indentation spacing
   deriving (Eq, Ord, Show)
 
 -- | Records tokenized and converted to common token format.
