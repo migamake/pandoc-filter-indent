@@ -23,7 +23,7 @@ import Token
 tokenizer :: Text -> Maybe [(MyTok, MyLoc, Text)]
 tokenizer  = fmap ( splitTokens
                   . restoreLocations
-                  . (first haskellTok <$>) )
+                  . fmap (first haskellTok) )
            . tokenizeHaskell
 
 haskellTok SymbolTok  = TOperator
@@ -67,7 +67,8 @@ restoreLocations = go 1 1
         newLine  = line + lineIncr
         lineIncr = T.length (T.filter (=='\n') txt)
         newCol  | lineIncr == 0 = col + T.length txt
-                | otherwise     = T.length
+                | otherwise     = (+1)
+                                $ T.length
                                 $ fst
                                 $ T.break (=='\n')
                                 $ T.reverse txt

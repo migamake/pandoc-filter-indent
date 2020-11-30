@@ -113,16 +113,18 @@ renderText2 ps = T.concat $ go ps
                          Just (ACenter, _) -> "^"
                          Just (ALeft,   _) -> "|"
 
-safeTail []     = []
-safeTail (_:ls) = ls
-
 -- | Text content with markers for markers inside it.
-textWithMarkers tColumns nextCol tok = T.pack
-                                     $ foldr insertMarker (T.unpack $ view textContent tok)
-                                     $ trace (show unaccountedMarkers) $ reverse unaccountedMarkers
+textWithMarkers tColumns nextCol tok = 
+    T.pack $ insertMarkers unaccountedMarkers $ T.unpack $ view textContent tok
   where
-    insertMarker index = insertAt (index-getCol tok) '.'
-    unaccountedMarkers = withoutKnownMarker
+    insertMarkers []   txt = txt
+    insertMarkers mrks txt = (\result -> trace ("insertMarkers " <> show mrks <> " " <> show txt <> " => " <> result) result)
+                           $ foldr insertMarker txt
+                           $ trace (show unaccountedMarkers) mrks
+
+    insertMarker index = insertAt index '.'
+    unaccountedMarkers = fmap (-getCol tok+)
+                       $ withoutKnownMarker
                        $ columnsBetween (getCol tok) nextCol
     withoutKnownMarker | Just _ <- view alignPos tok = safeTail
                        | otherwise                   = id

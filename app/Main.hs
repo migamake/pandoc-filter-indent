@@ -30,8 +30,7 @@ blockFormatter _ x = x
 codeFormatter :: Text -> Attr -> Text -> Block
 codeFormatter format attrs content | True =
         trace ("Output format: " <> show format) $
-        (render format attrs $
-           filterCodeBlock content)
+        (render format attrs $ filterCodeBlock content)
         --CodeBlock attrs $ T.pack $ show $ tokenizer content
         --CodeBlock attrs $ T.pack $ show $ tokenizer content
     {-
