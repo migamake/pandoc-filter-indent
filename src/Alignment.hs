@@ -7,6 +7,8 @@
 module Alignment where
 
 import Data.Text (Text)
+import Data.Tuple.Optics
+import Optics.Lens
 
 import Token
 import Tuples
@@ -15,9 +17,13 @@ import Tuples
 data Align =
     ALeft
   | ACenter
-  | ANone -- no alignment, but this is a column where alignment happens for other lines
   deriving (Eq, Ord, Show)
 
 -- | Records tokenized and converted to common token format.
-type Aligned    = (MyTok, MyLoc, Text, Maybe Int, Maybe Align)
+type Processed = (MyTok, MyLoc, Text, Maybe Int, Maybe (Align, Int))
+
+-- | Access text content.
+textContent :: Field3 a a Text Text => Lens' a Text
+textContent  = _3
+
 

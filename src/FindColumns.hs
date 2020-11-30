@@ -4,15 +4,15 @@
 {-# LANGUAGE TypeSynonymInstances  #-}
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE FlexibleContexts      #-}
-module FindColumns(findColumns) where
+module FindColumns(findColumns, getLine, getCol, getLineCol, alignPos, tableColumns) where
 
 import Text.Pandoc.JSON
 import Text.Pandoc.Definition ()
-import Data.Function(on)
-import Data.String (fromString, IsString)
-import Data.Text (Text)
-import Data.List(groupBy, sortBy, sort, group)
-import Prelude hiding(getLine)
+import Data.Function  (on)
+import Data.String    (fromString, IsString)
+import Data.Text      (Text)
+import Data.List      (groupBy, sortBy, sort, group, findIndex)
+import Prelude hiding (getLine)
 import Optics.Core
 import Data.Tuple.Optics
 
@@ -20,22 +20,29 @@ import Token
 import Token.Haskell
 import Tuples
 import Alignment
+import Util
 
 -- | Records tokenized and converted to common token format.
 type Unanalyzed = (MyTok, MyLoc, Text, Maybe Int             )
+
+-- | Records aligned, but without column numbers yet.
+type Aligned   = (MyTok, MyLoc, Text, Maybe Int, Maybe Align)
 
 -- * Definitions of fields accessible at many stages
 getCol, getLine :: Field2 a a MyLoc MyLoc => a -> Int
 getCol  = view $ _2 % col
 getLine = view $ _2 % line
 
-align :: Field5 a a (Maybe Align) (Maybe Align) => Lens' a (Maybe Align)
+align :: Field5 a a (Maybe b) (Maybe b) => Lens' a (Maybe b)
 align  = _5
 
+alignPos :: Field5 a a (Maybe (Align, Int)) (Maybe (Align, Int)) => Lens' a (Maybe (Align, Int))
+alignPos  = _5
+
 -- | Find columns from tokens.
-findColumns :: [Tokenized] -> [Aligned]
+findColumns :: [Tokenized] -> [Processed]
 findColumns =
-      markSpaces
+      columnIndices
     . withExtraColumns
     . sortBy (compare `on` getLineCol)
     . concat
@@ -86,23 +93,22 @@ extraColumns =
     hasAlignment (_, Nothing) = False
     hasAlignment (_, Just _)  = True
 
-nubSorted = fmap head
-          . group
-          . sort
-
 withExtraColumns x = (x, extraColumns x)
 
-markSpaces (tokens, spaces) = markSpace (view _1 <$> spaces) <$> tokens
+-- | Compute all alignment columns existing and their positions in the text column space.
+tableColumns :: Field2 a a  MyLoc     MyLoc
+             => Field5 a a (Maybe b) (Maybe b)
+             => [a]
+             -> [(Int, Maybe b)]
+tableColumns  =
+    nubSortedBy (compare `on` fst)
+  . filter hasAlignment
+  . map extract
+  where
+    extract x                 = (getCol x, view align x)
+    hasAlignment (_, Nothing) = False
+    hasAlignment (_, Just _)  = True
 
-markSpace :: [Int] -- ^ All columns with alignment markers
-          -> _
-          -> _
-markSpace spaces token =
-  case view align token of
-    Nothing | getCol token `elem` spaces -> -- Check if there is space to be inserted
-      set align (Just ANone) token
-    _              -> token
-  
 {-
 -- | Detect uninterrupted stretches that cover consecutive columns.
 blocks :: [Unanalyzed] -> [[Unanalyzed]]
@@ -132,13 +138,6 @@ blocks = groupBy consecutive
 
 --withGroups k f = map k . grouping k
 
-grouping    :: Ord k
-            => (   a -> k)
-            ->    [a]
-            ->   [[a]]
-grouping key = groupBy ((==)    `on` key)
-             . sortBy  (compare `on` key)
-
 -- | Add line indent to each token in line.
 addLineIndent :: [Tokenized] -> [Unanalyzed]
 addLineIndent aLine = (`annex` indentColumn) <$> aLine
@@ -149,4 +148,19 @@ addLineIndent aLine = (`annex` indentColumn) <$> aLine
     notBlank        _                           = True
     extractColumn  []                           = Nothing
     extractColumn  ((_,   MyLoc line col, _):_) = Just col
+
+columnIndices :: ([Aligned], [(Int, b)]) -> [Processed]
+columnIndices (allAligned, map fst -> markerColumns) = map addIndex allAligned
+  where
+    addIndex :: Aligned -> Processed
+    addIndex aligned = (_5 `over` mod) aligned
+      where
+        mod :: Maybe Align -> Maybe (Align, Int)
+        mod Nothing   = Nothing
+        mod (Just  a) =
+             Just (a, colIndex)
+          where
+            colIndex = case findIndex (==getCol aligned) markerColumns of
+                         Nothing -> error $ "Did not find the index for column " <> show (getCol aligned) <> " within " <> show markerColumns
+                         Just i  -> i
 
