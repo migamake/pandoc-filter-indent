@@ -40,34 +40,43 @@ wrapTable cols txt =
            -- ,"\\setlength{\\tabcolsepBACKUP}{\\tabcolsep}"
             "\\setlength{\\tabcolsep}{1pt}\n"
           , "\\begin{tabular}{"
-          , T.replicate (cols+2) "l"
+          , T.replicate (cols+3) "l" -- FIXME: tests for correct number of columns
           , "}\n"
           , txt, "\n\\end{tabular}"
            --,"\\setlength{\\tabcolsep}{\\tabcolsepBACKUP}"
           ]
 
 -- Decrease column spacing: \\setlength{\\tabcolsep}{1ex}
+-- TODO: braced operators
+preformatTokens []                                                     = []
+preformatTokens ((TOperator,"`"):(TVar, "elem"):(TOperator, "`"):rest) = (TOperator, "elem"):preformatTokens rest
+preformatTokens (a                                              :rest) =  a                 :preformatTokens rest
 
 formatTokens :: [(MyTok, Text)] -> Text
-formatTokens  = T.concat . fmap formatToken . (\t -> trace ("Tokens: " <> show t) t)
+formatTokens  = T.concat
+              . fmap formatToken
+              . preformatTokens
+              . (\t -> trace ("Tokens: " <> show t) t) -- debug
 
-formatToken (TKeyword, kwd     ) = "\\textbf{" <> protectText kwd <> "}"
-formatToken (TOther,   ">>="   ) = mathop "gg\\joinrel="
-formatToken (TOther,   "forall") = mathop "forall"
-formatToken (TOther,   "mempty") = mathop "emptyset"
-formatToken (TOther,   "bottom") = mathop "bot"
-formatToken (TOther,   "top"   ) = mathop "top"
-formatToken (TOther,   "not"   ) = mathop "neg"
-formatToken (TOther,   "|"     ) = mathop "vert"
-formatToken (TOther,   "||"    ) = mathop "parallel"
-formatToken (TOther,   "|>"    ) = mathop "triangleright"
-formatToken (TOther,   ">>"    ) = mathop "gg"
-formatToken (TOther,   ">>>"   ) = mathop "ggg"
-formatToken (TOther,   "<<"    ) = mathop "ll"
-formatToken (TOther,   "<<<"   ) = mathop "lll"
-formatToken (TOther,   "-<"    ) = mathop "prec"
-formatToken (TOther,   "<-"    ) = mathop "gets"
-formatToken (TOther,   ">="    ) = mathop "geq"
+formatToken (TKeyword, "forall") = mathop "forall"
+formatToken (TVar,     "mempty") = mathop "emptyset"
+formatToken (TVar,     "bottom") = mathop "bot"
+formatToken (TVar,     "top"   ) = mathop "top"
+formatToken (TVar,     "not"   ) = mathop "neg"
+--formatToken (TOperator,"("     ) = mathop "("
+--formatToken (TOperator,")"     ) = mathop ")"
+formatToken (TOperator,">>="   ) = mathop "gg\\joinrel="
+formatToken (TOperator,">=>"   ) = mathop ">\\joinrel=>"
+formatToken (TOperator,"|"     ) = mathop "vert"
+formatToken (TOperator,"||"    ) = mathop "parallel"
+formatToken (TOperator,"|>"    ) = mathop "triangleright"
+formatToken (TOperator,">>"    ) = mathop "gg"
+formatToken (TOperator,">>>"   ) = mathop "ggg"
+formatToken (TOperator,"<<"    ) = mathop "ll"
+formatToken (TOperator,"<<<"   ) = mathop "lll"
+formatToken (TOperator,"-<"    ) = mathop "prec"
+formatToken (TOperator,"<-"    ) = mathop "gets"
+formatToken (TOperator,">="    ) = mathop "geq"
 formatToken (TOperator,"<="    ) = mathop "leq"
 formatToken (TOperator,"!="    ) = mathop "ne"
 formatToken (TOperator,"<->"   ) = mathop "leftrightarrow"
@@ -77,10 +86,16 @@ formatToken (TOperator,"<>"    ) = mathop "diamond"
 formatToken (TOperator,"elem"  ) = mathop "in"
 formatToken (TOperator,"~"     ) = mathop "sim"
 formatToken (TOperator,"~="    ) = mathop "approx"
-formatToken (TOther,   "mempty") = mathop "gg"
-formatToken (TOther,   "a"     ) = mathop "alpha"
-formatToken (TOther,   "b"     ) = mathop "beta"
-formatToken (TOther,   "\\"    ) = mathop "lambda"
-formatToken (_, txt) = txt
+formatToken (TVar,     "a"     ) = mathop "alpha"
+formatToken (TVar,     "b"     ) = mathop "beta"
+formatToken (TVar,     "c"     ) = mathop "gamma"
+formatToken (TVar,     "d"     ) = mathop "delta"
+formatToken (TVar,     "eps"   ) = mathop "epsilon"
+formatToken (TVar    , kwd     ) = "\\emph{" <> protectText kwd <> "}"
+formatToken (TNum    , kwd     ) = "\\ensuremath{" <> protectText kwd <> "}"
+formatToken (TKeyword, kwd     ) = "\\textbf{" <> protectText kwd <> "}"
+formatToken (TCons,    cons    ) = "\\textsc{" <> protectText cons <> "}"
+formatToken (TOperator,"\\"    ) = mathop "lambda"
+formatToken (_,        txt     ) = protectText txt
 
 mathop code = "\\ensuremath{\\" <> code <> "{}}"

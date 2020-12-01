@@ -26,12 +26,17 @@ tokenizer  = fmap ( splitTokens
                   . fmap (first haskellTok) )
            . tokenizeHaskell
 
-haskellTok SymbolTok  = TOperator
-haskellTok SpaceTok   = TBlank
-haskellTok CommentTok = TBlank
-haskellTok PragmaTok  = TBlank
-haskellTok KeywordTok = TKeyword
-haskellTok t          = TOther
+haskellTok SymbolTok      = TOperator
+haskellTok SpaceTok       = TBlank
+haskellTok CommentTok     = TBlank
+haskellTok PragmaTok      = TBlank
+haskellTok KeywordTok     = TKeyword
+haskellTok ConstructorTok = TCons
+haskellTok VariableTok    = TVar
+haskellTok OperatorTok    = TOperator
+haskellTok RationalTok    = TNum
+haskellTok IntegerTok     = TNum
+haskellTok t              = TOther
 
 locLine (Loc startLineNo startColNo _ _) = startLineNo
 locCol  (Loc startLineNo startColNo _ _) = startColNo

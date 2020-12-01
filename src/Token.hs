@@ -21,6 +21,9 @@ data MyTok =
     TBlank
   | TOperator
   | TKeyword
+  | TCons
+  | TVar
+  | TNum
   | TOther
   deriving (Eq, Ord, Show)
 

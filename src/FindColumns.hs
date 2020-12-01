@@ -106,6 +106,7 @@ extraColumns =
 withExtraColumns x = (x, extraColumns x)
 
 -- | Compute all alignment columns existing and their positions in the text column space.
+-- TEST: check that we always have correct number of columns
 tableColumns :: Field2 a a  MyLoc     MyLoc
              => Field5 a a (Maybe b) (Maybe b)
              => [a]

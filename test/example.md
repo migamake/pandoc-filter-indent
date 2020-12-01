@@ -30,3 +30,40 @@ class Eq      a
    (>=)    :: a -> a -> Bool
 ```
 
+```{.haskell}
+test :: forall a. a -> b -> c -> d -> e
+test = do
+  (>>=)
+  x `elem` v
+  (>=>)
+  mempty
+  bottom
+  top
+  not
+  (|)
+  (||)
+  (|>)
+  (>>)
+  (>>>)
+  <<
+  <<<
+  -<
+  <-
+  >=
+  <=
+  !=
+  <->
+  ->
+  =>
+  <>
+  elem
+  ~
+  ~=
+  mempty
+  a
+  b
+  c
+  d
+  eps
+  TCons
+```
