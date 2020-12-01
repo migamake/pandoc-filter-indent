@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ViewPatterns      #-}
 module Render.Latex(latexFromColSpans) where
 
 import Data.Text(Text)
@@ -28,8 +29,8 @@ renderColSpan ([(TBlank, txt)], colSpan, AIndent) = -- indentation
 renderColSpan (toks, colSpan, alignment) =
     T.concat [ "\\multicolumn{",  T.pack $ show colSpan
                           , "}{", alignMark alignment
-                          , "}{", formatTokens toks
-                          , "}" ]
+                          , "}{$", formatTokens toks
+                          , "$}" ]
   where
     alignMark ACenter = "c"
     alignMark ALeft   = "l"
@@ -58,6 +59,11 @@ formatTokens  = T.concat
               . preformatTokens
               . (\t -> trace ("Tokens: " <> show t) t) -- debug
 
+unbrace txt | T.head txt == '(' && T.last txt == ')' && T.length txt > 2 = Just $ T.tail $ T.init txt
+unbrace _ = Nothing
+
+-- Workaround with joinEscapedOperators til w consider spaces only.
+formatToken (TOperator,unbrace -> Just op) = "(" <> formatToken (TOperator, op) <> ")"
 formatToken (TKeyword, "forall") = mathop "forall"
 formatToken (TVar,     "mempty") = mathop "emptyset"
 formatToken (TVar,     "bottom") = mathop "bot"
@@ -66,7 +72,16 @@ formatToken (TVar,     "not"   ) = mathop "neg"
 --formatToken (TOperator,"("     ) = mathop "("
 --formatToken (TOperator,")"     ) = mathop ")"
 formatToken (TOperator,">>="   ) = mathop "gg\\joinrel="
-formatToken (TOperator,">=>"   ) = mathop ">\\joinrel=>"
+formatToken (TOperator,">=>"   ) = mathop "rightarrowtail" -- "Rightarrowtail" does not exist
+                                   --">" <> mathop "joinrel={>}"
+formatToken (TOperator,"|-"    ) = mathop "vdash"
+formatToken (TOperator,"/\\"   ) = mathop "lor"
+formatToken (TOperator,"\\/"   ) = mathop "land"
+formatToken (TOperator,"\\|/"  ) = mathop "downarrow"
+formatToken (TOperator,"\\||/" ) = mathop "Downarrow"
+formatToken (TOperator,"~>"    ) = mathop "leadsto"
+formatToken (TOperator,"|="    ) = mathop "models"
+formatToken (TCons    ,"Natural") = mathop "N"
 formatToken (TOperator,"|"     ) = mathop "vert"
 formatToken (TOperator,"||"    ) = mathop "parallel"
 formatToken (TOperator,"|>"    ) = mathop "triangleright"
@@ -82,6 +97,8 @@ formatToken (TOperator,"!="    ) = mathop "ne"
 formatToken (TOperator,"<->"   ) = mathop "leftrightarrow"
 formatToken (TOperator,"->"    ) = mathop "rightarrow"
 formatToken (TOperator,"=>"    ) = mathop "Rightarrow"
+formatToken (TOperator,"|->"    ) = mathop "mapsto"
+formatToken (TOperator,"|=>"    ) = mathop "Mapsto"
 formatToken (TOperator,"<>"    ) = mathop "diamond"
 formatToken (TOperator,"elem"  ) = mathop "in"
 formatToken (TOperator,"~"     ) = mathop "sim"
@@ -91,11 +108,12 @@ formatToken (TVar,     "b"     ) = mathop "beta"
 formatToken (TVar,     "c"     ) = mathop "gamma"
 formatToken (TVar,     "d"     ) = mathop "delta"
 formatToken (TVar,     "eps"   ) = mathop "epsilon"
-formatToken (TVar    , kwd     ) = "\\emph{" <> protectText kwd <> "}"
-formatToken (TNum    , kwd     ) = "\\ensuremath{" <> protectText kwd <> "}"
-formatToken (TKeyword, kwd     ) = "\\textbf{" <> protectText kwd <> "}"
-formatToken (TCons,    cons    ) = "\\textsc{" <> protectText cons <> "}"
+formatToken (TVar    , kwd     ) = "\\emph{"       <> protectText kwd  <> "}"
+--formatToken (TNum    , kwd     ) = "\\ensuremath{" <> protectText kwd  <> "}"
+formatToken (TNum    , kwd     ) = protectText kwd 
+formatToken (TKeyword, kwd     ) = "\\textbf{"     <> protectText kwd  <> "}"
+formatToken (TCons,    cons    ) = "\\textsc{"     <> protectText cons <> "}"
 formatToken (TOperator,"\\"    ) = mathop "lambda"
-formatToken (_,        txt     ) = protectText txt
+formatToken (_,        txt     ) = "\\textit{"     <> protectText txt  <> "}"
 
-mathop code = "\\ensuremath{\\" <> code <> "{}}"
+mathop code = "\\" <> code

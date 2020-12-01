@@ -21,7 +21,8 @@ import Token
 
 -- * Haskell tokenizer frontend
 tokenizer :: Text -> Maybe [(MyTok, MyLoc, Text)]
-tokenizer  = fmap ( splitTokens
+tokenizer  = fmap ( joinEscapedOperators
+                  . splitTokens
                   . restoreLocations
                   . fmap (first haskellTok) )
            . tokenizeHaskell
@@ -61,6 +62,11 @@ splitTokens = mconcat
         mkEntry :: Int -> Text -> (MyTok, MyLoc, Text)
         mkEntry i t = (TBlank, MyLoc i 1, t)
     splitter  other             = [other]
+
+joinEscapedOperators ((TOperator, loc, "("):(TOperator, _, op):(TOperator, _, ")"):rest) =
+   (TOperator, loc, "(" <> op <> ")"):joinEscapedOperators rest
+joinEscapedOperators (tok:rest) = tok:joinEscapedOperators rest
+joinEscapedOperators []         = []
 
 -- | Restore locations
 -- TESTME: test

@@ -63,9 +63,9 @@ getLineCol x = (getLine x, getCol x)
 markBoundaries :: [Unanalyzed] -> [Aligned]
 markBoundaries = map markIndent
                . concat
-               . (\b -> trace ("ALIGNED: " <> show b) b)
+               -- . (\b -> trace ("ALIGNED: " <> show b) b)
                . map alignBlock
-               . (\b -> trace ("BLOCKS: " <> show b) b)
+               -- . (\b -> trace ("BLOCKS: " <> show b) b)
                . blocks
                . sortBy (compare `on` getLine)
   where
@@ -86,8 +86,8 @@ alignBlock :: [Unanalyzed] -> [Aligned]
 alignBlock [a]                            = withAlign  Nothing       <$> [a]
 alignBlock opList | all isOperator opList = withAlign (Just ACenter) <$> opList
   where
-    isOperator (TOperator, _, _, _) = True
-    isOperator  _                   = False
+    isOperator (TOperator, _,   _, _) = True
+    isOperator  _                     = False
 alignBlock aList                          = withAlign (Just ALeft  ) <$> aList
 
 -- | Compute all alignment columns existing and their positions in the text column space.
