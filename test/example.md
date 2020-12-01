@@ -64,6 +64,12 @@ test = do
   b
   c
   d
+  f <$> x <*> y
   eps
   TCons
+  bot
+  undefined
+  |=>
+  |->
+  \\
 ```

@@ -67,13 +67,12 @@ formatToken (TOperator,unbrace -> Just op) = "(" <> formatToken (TOperator, op) 
 formatToken (TKeyword, "forall") = mathop "forall"
 formatToken (TVar,     "mempty") = mathop "emptyset"
 formatToken (TVar,     "bottom") = mathop "bot"
+formatToken (TVar,  "undefined") = mathop "perp"
 formatToken (TVar,     "top"   ) = mathop "top"
 formatToken (TVar,     "not"   ) = mathop "neg"
---formatToken (TOperator,"("     ) = mathop "("
---formatToken (TOperator,")"     ) = mathop ")"
-formatToken (TOperator,">>="   ) = mathop "gg\\joinrel="
-formatToken (TOperator,">=>"   ) = mathop "rightarrowtail" -- "Rightarrowtail" does not exist
-                                   --">" <> mathop "joinrel={>}"
+formatToken (TOperator,">>="   ) = mathop "mathbin{>\\!\\!\\!>\\!\\!=}" -- from lhs2TeX, Neil Mitchell's
+formatToken (TOperator,"=<<"   ) = mathop "mathbin{=\\!\\!<\\!\\!\\!<}" -- from lhs2TeX, Neil Mitchell's
+formatToken (TOperator,">=>"   ) = mathop "mathbin{>\\!\\!=\\!\\!\\!>}"
 formatToken (TOperator,"|-"    ) = mathop "vdash"
 formatToken (TOperator,"/\\"   ) = mathop "lor"
 formatToken (TOperator,"\\/"   ) = mathop "land"
@@ -85,21 +84,27 @@ formatToken (TCons    ,"Natural") = mathop "N"
 formatToken (TOperator,"|"     ) = mathop "vert"
 formatToken (TOperator,"||"    ) = mathop "parallel"
 formatToken (TOperator,"|>"    ) = mathop "triangleright"
+formatToken (TOperator,">>"    ) = mathop "mathbin{>\\!\\!\\!>}" -- gg
+formatToken (TOperator,">>>"   ) = mathop "mathbin{>\\!\\!\\!>\\!\\!\\!>}" -- gg
 formatToken (TOperator,">>"    ) = mathop "gg"
 formatToken (TOperator,">>>"   ) = mathop "ggg"
 formatToken (TOperator,"<<"    ) = mathop "ll"
 formatToken (TOperator,"<<<"   ) = mathop "lll"
 formatToken (TOperator,"-<"    ) = mathop "prec"
+formatToken (TOperator,"\\\\"  ) = mathop "setminus"
 formatToken (TOperator,"<-"    ) = mathop "gets"
 formatToken (TOperator,">="    ) = mathop "geq"
 formatToken (TOperator,"<="    ) = mathop "leq"
 formatToken (TOperator,"!="    ) = mathop "ne"
 formatToken (TOperator,"<->"   ) = mathop "leftrightarrow"
-formatToken (TOperator,"->"    ) = mathop "rightarrow"
+formatToken (TOperator,"->"    ) = mathop "to"
 formatToken (TOperator,"=>"    ) = mathop "Rightarrow"
-formatToken (TOperator,"|->"    ) = mathop "mapsto"
-formatToken (TOperator,"|=>"    ) = mathop "Mapsto"
+formatToken (TOperator,"==>"   ) = mathop "implies"
+formatToken (TOperator,"|->"   ) = mathop "mapsto"
+--formatToken (TOperator,"|=>"   ) = mathop "Mapsto" -- not in amssymb
 formatToken (TOperator,"<>"    ) = mathop "diamond"
+formatToken (TOperator,"<$>"   ) = mathop "mathbin{\\ooalign{\\raise.29ex\\hbox{$\\scriptscriptstyle\\$$}\\cr\\hss$\\!\\lozenge$\\hss}}"
+formatToken (TOperator,"<*>"   ) = mathop "mathbin{\\ooalign{\\raise.37ex\\hbox{$\\scriptscriptstyle{*}$}\\cr\\hss$\\!\\lozenge$\\hss}}"
 formatToken (TOperator,"elem"  ) = mathop "in"
 formatToken (TOperator,"~"     ) = mathop "sim"
 formatToken (TOperator,"~="    ) = mathop "approx"
@@ -109,7 +114,6 @@ formatToken (TVar,     "c"     ) = mathop "gamma"
 formatToken (TVar,     "d"     ) = mathop "delta"
 formatToken (TVar,     "eps"   ) = mathop "epsilon"
 formatToken (TVar    , kwd     ) = "\\emph{"       <> protectText kwd  <> "}"
---formatToken (TNum    , kwd     ) = "\\ensuremath{" <> protectText kwd  <> "}"
 formatToken (TNum    , kwd     ) = protectText kwd 
 formatToken (TKeyword, kwd     ) = "\\textbf{"     <> protectText kwd  <> "}"
 formatToken (TCons,    cons    ) = "\\textsc{"     <> protectText cons <> "}"
@@ -117,3 +121,5 @@ formatToken (TOperator,"\\"    ) = mathop "lambda"
 formatToken (_,        txt     ) = "\\textit{"     <> protectText txt  <> "}"
 
 mathop code = "\\" <> code
+
+prologue = T.concat ["\\usepackage{amssymb}"]
