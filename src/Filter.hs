@@ -31,6 +31,7 @@ render ::  Text       -- ^ Format string
        ->  Attr       -- ^ Attributes
        -> [Processed] -- ^ Data about alignment
        ->  Block
+render "text" attrs aligned = RawBlock (Format "latex") $ processLatex aligned -- debug
 render "text"  attrs aligned = CodeBlock attrs $ Render.Debug.render aligned
 render "latex" attrs aligned = RawBlock (Format "latex") $ processLatex aligned
 -- Debugging option

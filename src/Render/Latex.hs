@@ -9,6 +9,7 @@ import Text.LaTeX.Base.Syntax(protectText)
 import Alignment
 import Render.Common(TokensWithColSpan)
 import Token(MyTok(..))
+import Debug.Trace(trace)
 
 latexFromColSpans :: Int -> [[TokensWithColSpan]] -> Text
 latexFromColSpans cols =
@@ -48,4 +49,38 @@ wrapTable cols txt =
 -- Decrease column spacing: \\setlength{\\tabcolsep}{1ex}
 
 formatTokens :: [(MyTok, Text)] -> Text
-formatTokens  = T.concat . map snd
+formatTokens  = T.concat . fmap formatToken . (\t -> trace ("Tokens: " <> show t) t)
+
+formatToken (TKeyword, kwd     ) = "\\textbf{" <> protectText kwd <> "}"
+formatToken (TOther,   ">>="   ) = mathop "gg\\joinrel="
+formatToken (TOther,   "forall") = mathop "forall"
+formatToken (TOther,   "mempty") = mathop "emptyset"
+formatToken (TOther,   "bottom") = mathop "bot"
+formatToken (TOther,   "top"   ) = mathop "top"
+formatToken (TOther,   "not"   ) = mathop "neg"
+formatToken (TOther,   "|"     ) = mathop "vert"
+formatToken (TOther,   "||"    ) = mathop "parallel"
+formatToken (TOther,   "|>"    ) = mathop "triangleright"
+formatToken (TOther,   ">>"    ) = mathop "gg"
+formatToken (TOther,   ">>>"   ) = mathop "ggg"
+formatToken (TOther,   "<<"    ) = mathop "ll"
+formatToken (TOther,   "<<<"   ) = mathop "lll"
+formatToken (TOther,   "-<"    ) = mathop "prec"
+formatToken (TOther,   "<-"    ) = mathop "gets"
+formatToken (TOther,   ">="    ) = mathop "geq"
+formatToken (TOperator,"<="    ) = mathop "leq"
+formatToken (TOperator,"!="    ) = mathop "ne"
+formatToken (TOperator,"<->"   ) = mathop "leftrightarrow"
+formatToken (TOperator,"->"    ) = mathop "rightarrow"
+formatToken (TOperator,"=>"    ) = mathop "Rightarrow"
+formatToken (TOperator,"<>"    ) = mathop "diamond"
+formatToken (TOperator,"elem"  ) = mathop "in"
+formatToken (TOperator,"~"     ) = mathop "sim"
+formatToken (TOperator,"~="    ) = mathop "approx"
+formatToken (TOther,   "mempty") = mathop "gg"
+formatToken (TOther,   "a"     ) = mathop "alpha"
+formatToken (TOther,   "b"     ) = mathop "beta"
+formatToken (TOther,   "\\"    ) = mathop "lambda"
+formatToken (_, txt) = txt
+
+mathop code = "\\ensuremath{\\" <> code <> "{}}"
