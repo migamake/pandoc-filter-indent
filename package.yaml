@@ -5,19 +5,31 @@ license:             BSD3
 author:              "Michał J. Gajda"
 maintainer:          "mjgajda@migamake.com"
 copyright:           "AllRightsReserved"
+category:            Text
+synopsis:            "Pandoc filter formatting Haskell code fragments using GHC lexer."
+description: |
+  Formats marked code fragments, and allows `pandoc` to safely process rest of your literate program:
+  .
+  > ```{.haskell}
+  .
+  Usage:
+  > stack install pandoc-filter-indent
+  > pandoc --filter pandoc-filter-indent -f input.md -o output.pdf
+  > pandoc --filter pandoc-filter-indent -f input.md -o output.html
+  .
+  Using `lhs2TeX` is somewhat inconvenient on large Markdown documents
+  processed with `pandoc`, since it assumes that it can freely redefine everything.
+  It is also pretty heavy on learning.
+  .
+  So instead we have a simple Pandoc filter that is only applied to `CodeFragment`s
+  and creates tabular code structures from indentation.
+  It uses GHC lexer to assure that latest features are always parsed correctly.
+  .
+  Please see the README on GitHub at <https://github.com/mjgajda/pandoc-filter-indent#readme>
 
 extra-source-files:
 - README.md
 - ChangeLog.md
-
-# Metadata used when publishing your package
-# synopsis:            Short description of your package
-# category:            Data
-
-# To avoid duplicated efforts in documentation and dealing with the
-# complications of embedding Haddock markup inside cabal files, it is
-# common to point users to the README.md file.
-description:         Please see the README on GitHub at <https://github.com/mjgajda/pandoc-filter-indent#readme>
 
 dependencies:
 - base >= 4.7 && < 5
@@ -34,7 +46,7 @@ library:
   source-dirs: src
 
 executables:
-  filter-indent:
+  pandoc-filter-indent:
     main:                Main.hs
     source-dirs:         app
     ghc-options:
