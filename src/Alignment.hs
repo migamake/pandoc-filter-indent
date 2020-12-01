@@ -24,6 +24,10 @@ data Align =
 type Processed = (MyTok, MyLoc, Text, Maybe Int, Maybe (Align, Int))
 
 -- | Access text content.
+tokenType :: Field1 a a MyTok MyTok => Lens' a MyTok
+tokenType  = _1
+
+-- | Access text content.
 textContent :: Field3 a a Text Text => Lens' a Text
 textContent  = _3
 

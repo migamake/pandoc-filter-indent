@@ -7,9 +7,10 @@ import qualified Data.Text as T
 import Text.LaTeX.Base.Syntax(protectText)
 
 import Alignment
-import Render.Common(TextWithColSpan)
+import Render.Common(TokensWithColSpan)
+import Token(MyTok(..))
 
-latexFromColSpans :: Int -> [[TextWithColSpan]] -> Text
+latexFromColSpans :: Int -> [[TokensWithColSpan]] -> Text
 latexFromColSpans cols =
     wrapTable cols
   . T.unlines
@@ -17,17 +18,17 @@ latexFromColSpans cols =
          . T.intercalate " & "
          . fmap renderColSpan )
 
-renderColSpan :: TextWithColSpan -> Text
-renderColSpan (text, colSpan, AIndent) | T.all isSpace text =
+renderColSpan :: TokensWithColSpan -> Text
+renderColSpan ([(TBlank, txt)], colSpan, AIndent) = -- indentation
     T.concat [ "\\multicolumn{",    T.pack $ show colSpan
-                          , "}{p{", T.pack $ show $ T.length text
-                          , "ex}}{",  protectText text
-                          , "}"]
-renderColSpan (text, colSpan, alignment) =
+                          , "}{p{", T.pack $ show $ T.length txt
+                          , "ex}}{",  protectText txt
+                          , "}" ]
+renderColSpan (toks, colSpan, alignment) =
     T.concat [ "\\multicolumn{",  T.pack $ show colSpan
                           , "}{", alignMark alignment
-                          , "}{", protectText text
-                          , "}"]
+                          , "}{", formatTokens toks
+                          , "}" ]
   where
     alignMark ACenter = "c"
     alignMark ALeft   = "l"
@@ -45,3 +46,6 @@ wrapTable cols txt =
           ]
 
 -- Decrease column spacing: \\setlength{\\tabcolsep}{1ex}
+
+formatTokens :: [(MyTok, Text)] -> Text
+formatTokens  = T.concat . map snd
