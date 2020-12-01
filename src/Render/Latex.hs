@@ -10,7 +10,9 @@ import Text.LaTeX.Base.Syntax(protectText)
 import Alignment
 import Render.Common(TokensWithColSpan)
 import Token(MyTok(..))
-import Debug.Trace(trace)
+import Util(unbrace)
+
+--import Debug.Trace(trace)
 
 latexFromColSpans :: Int -> [[TokensWithColSpan]] -> Text
 latexFromColSpans cols =
@@ -57,10 +59,7 @@ formatTokens :: [(MyTok, Text)] -> Text
 formatTokens  = T.concat
               . fmap formatToken
               . preformatTokens
-              . (\t -> trace ("Tokens: " <> show t) t) -- debug
-
-unbrace txt | T.head txt == '(' && T.last txt == ')' && T.length txt > 2 = Just $ T.tail $ T.init txt
-unbrace _ = Nothing
+              -- . (\t -> trace ("Tokens: " <> show t) t) -- debug
 
 -- Workaround with joinEscapedOperators til w consider spaces only.
 formatToken (TOperator,unbrace -> Just op) = "(" <> formatToken (TOperator, op) <> ")"

@@ -24,6 +24,7 @@ dependencies:
 - ghc-syntax-highlighter == 0.0.5.0
 - text == 1.2.4.0
 - blaze-html == 0.9.1.2
+- blaze-markup
 - HaTeX
 - pandoc-types
 - optics-core

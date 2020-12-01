@@ -22,6 +22,8 @@ import Data.Tuple.Optics
 import Data.Tuple.Optics
 import Data.Text.Lazy.Builder
 
+import Token(MyTok(..))
+
 -- | Lens with default value.
 maybeLens :: a -> Lens (Maybe a) (Maybe a1) a a1
 maybeLens dflt = lens (fromMaybe dflt) (\_ a -> Just a)
@@ -48,4 +50,11 @@ nubSortedBy comparison = fmap    head
 -- | Safe tail function that returns empty list for empty input.
 safeTail []     = []
 safeTail (_:ls) = ls
+
+unbrace txt | T.head txt == '(' && T.last txt == ')' && T.length txt > 2 = Just $ T.tail $ T.init txt
+unbrace _ = Nothing
+
+preformatTokens []                                                     = []
+preformatTokens ((TOperator,"`"):(TVar, "elem"):(TOperator, "`"):rest) = (TOperator, "elem"):preformatTokens rest
+preformatTokens (a                                              :rest) =  a                 :preformatTokens rest
 
