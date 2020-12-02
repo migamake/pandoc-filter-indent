@@ -1,7 +1,6 @@
 ---
 title: "Code typesetting made simple"
 subtitle: "Project description"
-author: "Michał J. Gajda"
 date: |
   `\today`{=latex}
 abstract: |
@@ -24,16 +23,10 @@ affiliation:
 review: true
 numbersections: true
 header-includes:
-  - |
-  \usepackage{amssymb}
-  \usepackage{graphicx}
-  \DeclareUnicodeCharacter{03B1}{\ensuremath{\alpha{}}}
-  \newcommand{\longeq}{\scalebox{1.7}[1]{=}}
-prologue: |
-  \usepackage{amssymb}
-  \usepackage{graphicx}
-  \DeclareUnicodeCharacter{03B1}{\ensuremath{\alpha{}}}
-  \newcommand{\longeq}{\scalebox{1.7}[1]{=}}
+  - |-2
+    \usepackage{graphicx}
+    \DeclareUnicodeCharacter{03B1}{\ensuremath{\alpha{}}}
+    \renewcommand{\longeq}{\scalebox{1.7}[1]{=}}
 ---
 
 # Introduction
@@ -452,11 +445,14 @@ Global `Meta` attributes to be handled:
 
 ### TikZ marks
 
-TikZ marks are useful for marking up things on generated code.
+TikZ marks are useful for pointing to fragments of the generated code.
 
 You should just look for comments with syntax:
 `{->markName-}` and convert them to a raw
 LaTeX string `\tikzmark{markName}`.
+
+For HTML, it generates `<span id="markName" />` which you
+can then draw to with [a convenient JavaScript](https://stackoverflow.com/questions/554167/drawing-arrows-on-an-html-page-to-visualize-semantic-links-between-textual-spans#623770).
 
 ### Alternate lexers
 

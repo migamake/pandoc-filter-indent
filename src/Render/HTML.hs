@@ -2,13 +2,13 @@
 {-# LANGUAGE ViewPatterns      #-}
 module Render.HTML(htmlFromColSpans) where
 
-import Prelude hiding(span)
+import Prelude hiding(span, id)
 import Data.Text(Text)
 import Data.Char(isSpace)
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as LT
 import Text.Blaze.Html5 hiding(style)
-import Text.Blaze.Html5.Attributes(colspan, style)
+import Text.Blaze.Html5.Attributes(colspan, style, id)
 import Text.Blaze.Html.Renderer.Text(renderHtml)
 
 import Alignment
@@ -77,18 +77,20 @@ formatToken (TOperator,">>>"      ) = "⋙"
 formatToken (TOperator,"<<<"      ) = "⋘"
 formatToken (TOperator,"||"       ) = "∥"
 formatToken (TOperator,"<->"      ) = "↔︎"
-formatToken (TOperator,"<-"      ) = "←"
+formatToken (TOperator,"<-"       ) = "←"
 formatToken (TOperator,"-<"       ) = "≺"
 formatToken (TOperator,">-"       ) = "≻"
 formatToken (TOperator,"!="       ) = "≠"
-formatToken (TOperator,"\\/"       ) = "⋁"
-formatToken (TOperator,"/\\"       ) = "⋀"
-formatToken (TOperator,"~"       ) = "∼"
+formatToken (TOperator,"\\/"      ) = "⋁"
+formatToken (TOperator,"/\\"      ) = "⋀"
+formatToken (TOperator,"~"        ) = "∼"
 formatToken (TOperator,"~="       ) = "≈"
-formatToken (TVar,"top"       ) = "⊤"
-formatToken (TKeyword, kwd   ) = b $ toHtml kwd
-formatToken (TVar,     v     ) = i $ toHtml v
-formatToken (TCons,     v    ) = span (toHtml v)
+formatToken (TVar,"top"           ) = "⊤"
+formatToken (TKeyword, kwd        ) = b $ toHtml kwd
+formatToken (TVar,     v          ) = i $ toHtml v
+formatToken (TCons,     v         ) = span (toHtml v)
                                       ! style ("font-variant: small-caps;")
-formatToken (_, txt) = toHtml txt
+formatToken (TTikz mark,_         ) = span ""
+                                      ! id (toValue mark)
+formatToken (_,         txt       ) = toHtml txt
 

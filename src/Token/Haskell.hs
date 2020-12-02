@@ -8,6 +8,7 @@ import Control.Arrow(first)
 import Text.Pandoc.JSON
 import Text.Pandoc.Definition ()
 import Data.Function(on)
+import Data.Maybe(fromMaybe, isJust)
 import Data.String (fromString, IsString)
 import Data.Text (Text)
 import qualified Data.Text as T
@@ -24,10 +25,15 @@ tokenizer :: Text -> Maybe [(MyTok, MyLoc, Text)]
 tokenizer  = fmap ( joinEscapedOperators
                   . splitTokens
                   . restoreLocations
-                  . fmap (first haskellTok) )
+                  . fmap recognizeToken)
            . tokenizeHaskell
 
-haskellTok SymbolTok      = TOperator
+
+recognizeToken (CommentTok, tokText@(unTikzMark -> Just mark)) =
+  (TTikz mark,           tokText)
+recognizeToken (tokType, tokText) =
+  (haskellTok   tokType, tokText)
+
 haskellTok SpaceTok       = TBlank
 haskellTok CommentTok     = TBlank
 haskellTok PragmaTok      = TBlank

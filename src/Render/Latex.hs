@@ -117,6 +117,7 @@ formatToken (TNum    , kwd     ) = protectText kwd
 formatToken (TKeyword, kwd     ) = "\\textbf{"     <> protectText kwd  <> "}"
 formatToken (TCons,    cons    ) = "\\textsc{"     <> protectText cons <> "}"
 formatToken (TOperator,"\\"    ) = mathop "lambda"
+formatToken (TTikz mark,_      ) = mathop $ "tikzMark{" <> mark <> "}"
 formatToken (_,        txt     ) = "\\textit{"     <> protectText txt  <> "}"
 
 mathop code = "\\" <> code
