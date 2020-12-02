@@ -1,7 +1,10 @@
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE FlexibleInstances      #-}
+-- | Tuple utilities.
 module Tuples where
 
+-- | Class of tuples that can be expanded
+--   by a single element.
 class Annex c b a | c -> a, c -> b where
   annex :: b -> a -> c
 

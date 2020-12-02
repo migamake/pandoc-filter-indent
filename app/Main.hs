@@ -1,13 +1,15 @@
 {-# LANGUAGE OverloadedStrings #-}
-
+{-# LANGUAGE ViewPatterns      #-}
 module Main where
 
 import           Text.Pandoc.JSON
 import           Text.Pandoc.Definition ()
 import           Data.String (fromString, IsString)
-import           Data.Text (Text)
+import           Data.Maybe  (fromMaybe)
+import           Data.Text   (Text)
 import qualified Data.Text as T
---import Debug.Trace(trace)
+
+import Debug.Trace(trace)
 
 import Token.Haskell
 import GHC.SyntaxHighlighter
@@ -19,19 +21,26 @@ main = toJSONFilter blockFormatter
 
 -- | Select the desired format output then process it.
 blockFormatter :: Maybe Format -> Block -> Block
-blockFormatter  Nothing               (CodeBlock attrs content) = -- debugging mode
-    codeFormatter "text" attrs content
-blockFormatter (Just (Format format)) (CodeBlock attrs content)
-    | isHaskell attrs = codeFormatter format attrs content
+blockFormatter format (CodeBlock attrs content) =
+    codeFormatter (fromMaybe (Format "text") format) attrs content
 -- Do not touch other blocks than 'CodeBlock'
-blockFormatter _ x = x
+blockFormatter _       x                        = x
 
--- | Select formatter
-codeFormatter :: Text -> Attr -> Text -> Block
+-- | Run tokenizer, analysis, and formatter.
+--   Fallback to original input, if failed to tokenize.
+codeFormatter :: Format -- ^ Output format, defaults to "text" if not found
+              -> Attr -- ^ Code block attributes
+              -> Text -- ^ Code block content
+              -> Block
 codeFormatter format attrs content =
-        render format attrs (filterCodeBlock content)
+  case fmap findColumns $ aTokenizer content of
+    Just processed -> render format attrs processed
+    Nothing        -> CodeBlock attrs content -- fallback
+  where
+    aTokenizer | isHaskell attrs = Token.Haskell.tokenizer
+               | otherwise       = \_ -> Nothing
 
---  (Text, [Text], [(Text, Text)])
+-- | Check if the code block is tagged as Haskell.
 isHaskell :: (Foldable t, Eq a1, IsString a1) =>
                    (a2, t a1, c) -> Bool
 isHaskell (_, classes, _) = "haskell" `elem` classes

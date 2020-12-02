@@ -1,5 +1,5 @@
 name:                pandoc-filter-indent
-version:             0.1.0.0
+version:             0.2.0.0
 github:              "mjgajda/pandoc-filter-indent"
 license:             BSD3
 author:              "Michał J. Gajda"

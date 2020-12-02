@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ViewPatterns      #-}
+-- | Render analyzed tokens into HTML table.
 module Render.HTML(htmlFromColSpans) where
 
 import Prelude hiding(span, id)
@@ -15,19 +16,22 @@ import Render.Common(TokensWithColSpan)
 import Token        (MyTok(..))
 import Util ( preformatTokens, unbrace )
 
-htmlFromColSpans ::   p
-                 -> [[TokensWithColSpan]]
+-- | Given a list of lists of colspans in each table row, return an HTML text.
+htmlFromColSpans :: [[TokensWithColSpan]]
                  ->   Text
-htmlFromColSpans cols =
+htmlFromColSpans =
     LT.toStrict
   . renderHtml
   . table
   . tbody
   . mapM_ renderTr
 
+-- | Given a list of colspans within a single table row, render it to HTML tree
+--   of `<tr/>` element
 renderTr :: [TokensWithColSpan] -> Html
 renderTr colspans = tr (mapM_ renderColSpan colspans)
 
+-- | Render single colspan as a single `<td/>` cell.
 renderColSpan :: TokensWithColSpan -> Html
 renderColSpan ([(TBlank, txt)], colSpan, AIndent) = -- indentation
     td (toHtml txt)
@@ -45,6 +49,7 @@ renderColSpan (toks, colSpan, alignment) =
     alignMark ALeft   = "left"
 
 -- TODO: braced operators
+-- | Given a list of tokens in a colspan, render HTML fragment.
 formatTokens :: [(MyTok, Text)] -> Html
 formatTokens  = mapM_ formatToken
               . preformatTokens

@@ -2,6 +2,9 @@
 {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE FlexibleContexts      #-}
+-- | Helper functions for taking a list of
+--   processed records, and returning
+--   the same list splitted into separate colspans.
 module Render.ColSpan where
 
 import Data.Function(on)
@@ -16,6 +19,8 @@ import FindColumns ( alignPos, getLine, getLineCol )
 import Token(MyTok)
 import Util ( maybeLens )
 
+-- | A list of tokens to be put into a single colspan,
+--   Number of table columns in this colspan, and alignment option.
 type TokensWithColSpan = ([(MyTok, Text)], Int, Align)
 
 -- | Find colspan parameters
@@ -44,6 +49,7 @@ colspans ps = fmap ( fmap extractTokens -- extract token and text content from e
     extractToken tok = (view tokenType tok, view textContent tok)
 -- FIXME: split lines before colspans!
 
+-- | Given a `Processed` record, extract number of table columns.
 getAlignCol :: Processed -> Int
 getAlignCol = view (alignPos % maybeLens (ALeft, 0) % _2)
 

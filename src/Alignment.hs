@@ -1,4 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
+-- | Alignment options,
+--   and extracting common columns
+--   from tuples used in analysis.
 module Alignment where
 
 import Data.Text (Text)

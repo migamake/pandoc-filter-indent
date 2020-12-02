@@ -21,19 +21,27 @@ import GHC.SyntaxHighlighter
 import Token
 
 -- * Haskell tokenizer frontend
-tokenizer :: Text -> Maybe [(MyTok, MyLoc, Text)]
+-- | Attempt to tokenize input,
+--   returns `Nothing` if unsuccessful,
+--   so the processor can just pass input
+--   further when tokenizer fails.
+tokenizer :: Text -- ^ Input text of code block
+          -> Maybe [(MyTok, MyLoc, Text)]
 tokenizer  = fmap ( joinEscapedOperators
                   . splitTokens
                   . restoreLocations
                   . fmap recognizeToken)
            . tokenizeHaskell
 
-
+-- | Recognize token using both token type from `ghc-lib`,
+--   and text content.
+--   Only TikZ marks are recognized by looking up text content.
 recognizeToken (CommentTok, tokText@(unTikzMark -> Just mark)) =
   (TTikz mark,           tokText)
 recognizeToken (tokType, tokText) =
   (haskellTok   tokType, tokText)
 
+-- | Convert token type of `ghc-lib` into tokens recognized by the filter.
 haskellTok SpaceTok       = TBlank
 haskellTok CommentTok     = TBlank
 haskellTok PragmaTok      = TBlank
@@ -45,7 +53,9 @@ haskellTok RationalTok    = TNum
 haskellTok IntegerTok     = TNum
 haskellTok t              = TOther
 
+-- | Extract line number from `ghc-lib` slice location.
 locLine (Loc startLineNo startColNo _ _) = startLineNo
+-- | Extract column number from `ghc-lib` slice location.
 locCol  (Loc startLineNo startColNo _ _) = startColNo
 
 -- | Split tokens into one blank per line.

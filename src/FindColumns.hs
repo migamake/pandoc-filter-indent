@@ -4,6 +4,7 @@
 {-# LANGUAGE TypeSynonymInstances  #-}
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE FlexibleContexts      #-}
+-- | Find alignment columns.
 module FindColumns(findColumns, getLine, getCol, getLineCol, alignPos, tableColumns) where
 
 import Text.Pandoc.JSON
@@ -42,6 +43,7 @@ getLine = view $ _2 % line
 align :: Field5 a a (Maybe b) (Maybe b) => Lens' a (Maybe b)
 align  = _5
 
+-- | From a record with alignment option, select this option.
 alignPos :: Field5 a a (Maybe (Align, Int)) (Maybe (Align, Int)) => Lens' a (Maybe (Align, Int))
 alignPos  = _5
 
@@ -58,8 +60,10 @@ findColumns =
     . map addLineIndent
     . grouping getLine
 
+-- | Extract both line and column where a token starts.
 getLineCol x = (getLine x, getCol x)
 
+-- | Mark alignment boundaries.
 markBoundaries :: [Unanalyzed] -> [Aligned]
 markBoundaries = map markIndent
                . concat
@@ -79,9 +83,12 @@ markIndent (myTok,  myLoc@(MyLoc _ col), txt, Just indent, _) | indent == col =
            (myTok,  myLoc              , txt, Just indent, Just ALeft)
 markIndent other                                                               = other
 
+-- | Append alignment option to unanalyzed token record.
 withAlign :: Maybe Align -> Unanalyzed -> Aligned
 withAlign  = flip annex
 
+-- | Given a list of unanalyzed token records in a single column,
+--   check the alignment option that applies to this column.
 alignBlock :: [Unanalyzed] -> [Aligned]
 alignBlock [a]                            = withAlign  Nothing       <$> [a]
 alignBlock opList | all isOperator opList = withAlign (Just ACenter) <$> opList
@@ -120,6 +127,7 @@ tableColumns  =
     hasAlignment (_, Nothing) = False
     hasAlignment (_, Just _)  = True
 
+-- | Extract information about depth of indent in a line where token is.
 getIndent = view _4
 
 -- | Detect uninterrupted stretches that cover consecutive columns.
@@ -150,6 +158,8 @@ addLineIndent aLine = (`annex` indentColumn) <$> aLine
     extractColumn  []                           = Nothing
     extractColumn  ((_,   MyLoc line col, _):_) = Just col
 
+-- | Given a list of aligned records, and a list of marker columns,
+--   add table column indices to each record.
 columnIndices :: ([Aligned], [(Int, b)]) -> [Processed]
 columnIndices (allAligned, map fst -> markerColumns) = map addIndex allAligned
   where

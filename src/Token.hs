@@ -13,8 +13,11 @@ import           Data.Tuple.Optics
 import           Optics.TH
 
 -- * Common tokens and locations
--- Location is just line and column
-data MyLoc = MyLoc { _line, _col :: Int }
+--   We keep them here, so we can translate output from tokenizers to common format.
+-- | Location is just line and column (not a slice.)
+data MyLoc = MyLoc { _line :: Int -- ^ Line number starting from 1
+                   , _col  :: Int -- ^ Column number starting from 1
+                   }
   deriving (Eq, Ord, Show)
 
 makeLenses ''MyLoc
@@ -34,13 +37,20 @@ data MyTok =
 -- | Records tokenized and converted to common token format.
 type Tokenized = (MyTok, MyLoc, Text)
 
+-- | Unpack a Haskell comment with a TikZ mark indicator.
 unTikzMark    :: Text -> Maybe Text
 unTikzMark txt =
   unwrap "{->" "-}" txt >>= \case
     ""   -> Nothing
     mark -> Just mark
 
-unwrap :: Text -> Text -> Text -> Maybe Text
+-- | Given opening text, and closing text,
+--   check that input is "braced" by these, and strip them.
+--   Return `Nothing` if input text does not match.
+unwrap :: Text -- ^ Opening text
+       -> Text -- ^ Closing text
+       -> Text -- ^ Input to match
+       -> Maybe Text
 unwrap starter trailer   txt  |
   starter `T.isPrefixOf` txt &&
   trailer `T.isPrefixOf` txt  =

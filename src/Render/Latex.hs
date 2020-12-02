@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ViewPatterns      #-}
+-- | Render analyzed input into LaTeX table.
 module Render.Latex(latexFromColSpans) where
 
 import Data.Text(Text)
@@ -11,8 +12,9 @@ import Render.Common(TokensWithColSpan)
 import Token(MyTok(..))
 import Util(unbrace)
 
---import Debug.Trace(trace)
-
+-- | Given a number of table columns,
+--   and a list of lists of colspans for each table row,
+--   return raw LaTeX code.
 latexFromColSpans :: Int -> [[TokensWithColSpan]] -> Text
 latexFromColSpans cols =
     wrapTable cols
@@ -21,6 +23,7 @@ latexFromColSpans cols =
          . T.intercalate " & "
          . fmap renderColSpan )
 
+-- | Render a single colspan as LaTeX \multicolumn.
 renderColSpan :: TokensWithColSpan -> Text
 renderColSpan ([(TBlank, txt)], colSpan, AIndent) = -- indentation
     T.concat [ "\\multicolumn{",    T.pack $ show colSpan
@@ -36,6 +39,7 @@ renderColSpan (toks, colSpan, alignment) =
     alignMark ACenter = "c"
     alignMark ALeft   = "l"
 
+-- | Wrap a LaTeX table content into \begin{tabular} environment.
 wrapTable :: Int -> Text -> Text
 wrapTable cols txt =
   mconcat [-- "\\newlength{\\tabcolsepBACKUP}\n"
@@ -50,10 +54,14 @@ wrapTable cols txt =
 
 -- Decrease column spacing: \\setlength{\\tabcolsep}{1ex}
 -- TODO: braced operators
+-- | Preprocesses functions converted to operator syntax and joins them into a single token.
+-- FIXME: deduplicate
 preformatTokens []                                                     = []
 preformatTokens ((TOperator,"`"):(TVar, "elem"):(TOperator, "`"):rest) = (TOperator, "elem"):preformatTokens rest
 preformatTokens (a                                              :rest) =  a                 :preformatTokens rest
 
+-- | Format a list of tokens within a colspan.
+--   Preprocesses then and calls `formatToken` for each.
 formatTokens :: [(MyTok, Text)] -> Text
 formatTokens  = T.concat
               . fmap formatToken
@@ -61,6 +69,8 @@ formatTokens  = T.concat
               -- . (\t -> trace ("Tokens: " <> show t) t) -- debug
 
 -- Workaround with joinEscapedOperators til w consider spaces only.
+-- | Render a simple token.
+formatToken :: (MyTok, Text) -> Text
 formatToken (TOperator,unbrace -> Just op) = "(" <> formatToken (TOperator, op) <> ")"
 formatToken (TKeyword, "forall") = mathop "forall"
 formatToken (TVar,     "mempty") = mathop "emptyset"

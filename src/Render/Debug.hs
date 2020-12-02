@@ -16,16 +16,21 @@ import FindColumns ( alignPos, getCol, tableColumns )
 import Alignment ( textContent, Align(..), Processed )
 import Util ( safeTail )
 
+-- | Insert element at a given index of the list.
 insertAt       :: Show a => Int -> a -> [a] -> [a]
 insertAt i e ls = case maybeInsertAt i e ls of
                     Nothing -> error $ "Failed in insertAt " <> show i <> " " <> show e <> " " <> show ls
                     Just r  -> r
 
+-- | Insert element at a given index of the list, or return error.
 maybeInsertAt :: Int -> a -> [a] -> Maybe [a]
 maybeInsertAt 0 e    ls  = pure $ e:ls
 maybeInsertAt i e (l:ls) = (l:) <$> maybeInsertAt (i-1) e ls
 maybeInsertAt i e    []  = Nothing
 
+-- | Render text of code blocks
+--   with marker columns inserted
+--   to indicate alignment boundaries.
 render :: [Processed] -> Text
 render ps = T.concat $ go ps
   where
