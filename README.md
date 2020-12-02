@@ -1,6 +1,11 @@
 ---
 title: "Code typesetting made simple"
 subtitle: "Project description"
+description: |
+  To build this document use:
+
+  > pandoc README.md  -o README.pdf --filter=pandoc-filter-indent
+
 date: |
   `\today`{=latex}
 abstract: |
@@ -11,11 +16,12 @@ abstract: |
   is also a Pandoc filter, and can thus be used to improve comprehensibility of the code. It is also simple enough
   to be provided as a literate program within this submission. While it is processing Haskell code, we show how it
   can be easily adapted to typeset Python, Java or C/C++.
-author:
-  - name: Michał J. Gajda
-    email: mjgajda@migamake.com
-    orcid:       "0000-0001-7820-3906"
-    affiliation: 1
+author: Michał J. Gajda
+
+#  - name: Michał J. Gajda
+#    email: mjgajda@migamake.com
+#    orcid:       "0000-0001-7820-3906"
+#    affiliation: 1
 affiliation:
   institution: "Migamake Pte Ltd"
   email:        mjgajda@migamake.com
@@ -26,7 +32,13 @@ header-includes:
   - |-2
     \usepackage{graphicx}
     \DeclareUnicodeCharacter{03B1}{\ensuremath{\alpha{}}}
+
+prologue:
+  - |-2
+    \usepackage{graphicx}
+    \DeclareUnicodeCharacter{03B1}{\ensuremath{\alpha{}}}
     \renewcommand{\longeq}{\scalebox{1.7}[1]{=}}
+
 ---
 
 # Introduction
@@ -44,19 +56,28 @@ We propose a simple approach that can be used not just for code in languages wit
 We use `pandoc` to process only code fragments in otherwise unprocessed literate program
 or article with code excerpts.
 
-We detect layout boundaries from tokens: (1) we note an column indent for each line[^This step is implemented using GHC API.],
-then (2) mark a start of each operator (like `::`, `=`, or `>>=`) by column.
+We detect layout boundaries from tokens:
+
+(1) we note an column indent for each line^[This step is implemented using GHC API.],
+then
+
+(2) mark a start of each operator (like `::`, `=`, or `>>=`) by column.
 Our second step is that of transposing a list of `Line = [(Column, Token)]`
 into per-column list of indentations `[(Line, Token)]`.
+
 (3) If any token is present after more than a single space, we also mark its beginning
 as indentation boundary.
+
 (4) After sorting columns by line number, we mark these columns that have a consistent
 presence along consecutive lines as indentation anchors.
+
 (5) Additionally we mark the leftmost indent as a same indentation barrier
 as long as it follows the nesting order.
+
 (6) For postprocessing, we escape the text according to target text processing
 engine syntax, translate common operators to their ligatures (see appendix),
 and output the text with layout boundaries.
+
 We also plan to implement support for pointing to code fragments
 with TikZ target marks[@tikz] at this stage^[With syntax of `{->p1-}` standing for `\tikzmark{p1}`].
 
@@ -132,9 +153,9 @@ Instead we detect layout boundaries as follows:
 (\x |-> |x)
 ```
 
-## Generating \LaTeX or HTML output
+## Generating \LaTeX{} or HTML output
 
-When generating \LaTeX or HTML output, we simply
+When generating \LaTeX{} or HTML output, we simply
 assign a list of columns to each span of code tex in line.
 This can be implemented using multicolumn marking in both output languages.
 Consider the above example with columns numbered at starting character:
@@ -164,7 +185,7 @@ That means that we produce code like this for the first line:
 ```
 General syntax of
 `\multicolumn`^[See [Overleaf tutorial](https://www.overleaf.com/learn/latex/tables#Combining_rows_and_columns)
-if you do not know how \LaTeX tables work.] has three arguments, each enclosed with braces (`{}`):
+if you do not know how \LaTeX{} tables work.] has three arguments, each enclosed with braces (`{}`):
 1. Number of columns in the cell, for example `{2}` or `{6}`.
 2. Alignment of text in the cell:
     - `{l}` for left,
@@ -204,7 +225,7 @@ This can be easily converted to HTML table:
 Main executable is a `pandoc` filter.
 You get `pandoc` input stream, and replace
 [`CodeBlock` blocks](https://hackage.haskell.org/package/pandoc-types-1.20/docs/Text-Pandoc-Definition.html#t:Block)
-there with `Raw "latex"` LaTeX blocks.  It is these block elements of ADT that should contain the \LaTeX code
+there with `Raw "latex"` \LaTeX{} blocks.  It is these block elements of ADT that should contain the \LaTeX{} code
 Pandoc will build the document for you, and do it better than you would.
 Below is a modified [example from `pandoc` documentation](https://texblog.org/2012/12/21/multi-column-and-multi-row-cells-in-latex-tables/)
 for making a `pandoc` filter executable:
@@ -225,7 +246,7 @@ blockFormatter  x = x
 ```
 
 In the executable above, you write `haskellCodeFormatter` function
-that takes Haskell code, and returns \LaTeX code _fragment_ like this:
+that takes Haskell code, and returns \LaTeX{} code _fragment_ like this:
 
 ```{.latex}
 \begin{array}
@@ -237,7 +258,7 @@ that takes Haskell code, and returns \LaTeX code _fragment_ like this:
 
 We need to check Pandoc meta before issuing `walk`
 in order to check what is the output format.
-In case it is \LaTeX or PDF, then we produce \LaTeX raw code fragments.
+In case it is \LaTeX{} or PDF, then we produce \LaTeX{} raw code fragments.
 In case output format is any other, then we produce HTML table.
 
 ## Passing options to the filter
@@ -265,9 +286,9 @@ There are following options that will be processed:
   - `spaces`  -- space-only lexer: table column starts at the end of block of two or more whitespace characters
   - `python3` -- Python lexer (see below in @sec:python-lexer)
 * `debug` -- add option that shows table columns (for debugging layout)
-* `underbar` -- do not escape `_`, but instead use \LaTeX/HTML subscript til the end of the token:
-   `method_agile` becomes `method_{agile}` in \LaTeX, `x_i_j` becomes `x_{i,j}` in \LaTeX
-* table alignment (\LaTeX output only):
+* `underbar` -- do not escape `_`, but instead use \LaTeX{}/HTML subscript til the end of the token:
+   `method_agile` becomes `method_{agile}` in \LaTeX{}, `x_i_j` becomes `x_{i,j}` in \LaTeX{}
+* table alignment (\LaTeX{} output only):
   - `array` -- use `array` environment, the default
   - `polytable` -- use `polytable` environment
 * code alignment:
@@ -289,11 +310,11 @@ depending on type of the symbol.
 ```
 
 
-2. We also replace the common operators with \LaTeX symbols commonly used for this purpose:
+2. We also replace the common operators with \LaTeX{} symbols commonly used for this purpose:
 
-| Input token      | \LaTeX code   | Rendering       |
+| Input token      | \LaTeX{} code | Rendering       |
 |:-----------------|:--------------|:---------------:|
-| `Operator "="`   | `\longeq`     | $\longeq{}$     |
+| `Operator "="`   | `\scalebox{1.7}[1]{=}`     | $\scalebox{1.7}[1]{=}$ |
 | `Operator "<>"`  | `\diamond`    | $\diamond{}$    |
 | `Operator ">="`  | `\geq`        | $\geq{}$        |
 | `Operator "<="`  | `\geq`        | $\leq{}$        |
@@ -365,13 +386,13 @@ For finding the right symbol replacements use:
      * `b` to `\beta` shown as $\beta$
      * etc.
 
-2. [The Comprehensive LATEX Symbol List](http://tug.ctan.org/info/symbols/comprehensive/symbols-a4.pdf) is a good reference of LaTeX symbol names.
+2. [The Comprehensive LATEX Symbol List](http://tug.ctan.org/info/symbols/comprehensive/symbols-a4.pdf) is a good reference of \LaTeX{} symbol names.
    See section _3. Mathematical symbols_.
 
 ## Formatting different token types
 
-Since we want to use `\begin{array}` environment in LaTeX,
-we should encompass the token characters with different LaTeX operators.
+Since we want to use `\begin{array}` environment in \LaTeX{},
+we should encompass the token characters with different \LaTeX{} operators.
 
 * variables with `\textrm{var}`
 * type variables with `\mathit{tyvar}`
@@ -383,24 +404,11 @@ _Please let me know if there is a question about any other token types!_
 
 ## Safe escaping
 
-In order to safely escape strings, it would be best to
-make sure that conversion is done only on parts that are not escaped yet:
+In order to safely escape strings, we keep token type
+next to original token text over entire pipeline
+until rendering of code fragment as raw \LaTeX{} or HTML:
 ```{.haskell}
-data Escapable x =
-    Literal x
-  | Escaped x
-
-conversion :: Escapable Text -> Escapable LaTeX
-```
-
-Alternative is to perform the conversion as multistep process, with list of `Either` values:
-```{.haskell}
-type Input        = Either HaskellToken RawTeX
-type RawTeX       = String
-
-type Intermediate = Either UnescapedString RawTeX
-
-type Output       = Either () RawTeX
+type Token... = (MyTok, Text, ...)
 ```
 
 ### Pandoc filter connection
@@ -420,10 +428,10 @@ main = toJSONFilter (ourPandocWalk :: Walkable [a] Pandoc => ToJSONFilter (a -> 
 Then we make `ourPandocWalk` to be a function that:
 
 1. Matches [`Meta`](https://hackage.haskell.org/package/pandoc-types-1.20/docs/Text-Pandoc-Definition.html#t:Meta)
-to check if we are targetting LaTeX or HTML.
+to check if we are targetting \LaTeX{} or HTML.
 2. Finds [`CodeBlock`](https://hackage.haskell.org/package/pandoc-types-1.20/docs/Text-Pandoc-Definition.html#t:Block) and leaves everything else as-is.
 3. Generates `\table` as [`RawBlock`](https://hackage.haskell.org/package/pandoc-types-1.20/docs/Text-Pandoc-Definition.html#t:Block)
-   of LaTeX output.
+   of \LaTeX{} output.
 
 Options **shall** be parsed **per `CodeBlock`**.
 First parameter to each `CodeBlock` are attributes ([`Attr`](https://hackage.haskell.org/package/pandoc-types-1.20/docs/Text-Pandoc-Definition.html#t:Attr)).
@@ -439,7 +447,7 @@ Per-`CodeBlock` attributes to be handled:
 
 Global `Meta` attributes to be handled:
 * output format:
-  - LaTeX or PDF -- produce LaTeX `RawBlock`
+  - \LaTeX{} or PDF -- produce \LaTeX{} `RawBlock`
   - HTML -- produce HTML `RawBlock`
   - or all others -- produce `Table`
 
@@ -449,7 +457,7 @@ TikZ marks are useful for pointing to fragments of the generated code.
 
 You should just look for comments with syntax:
 `{->markName-}` and convert them to a raw
-LaTeX string `\tikzmark{markName}`.
+\LaTeX{} string `\tikzmark{markName}`.
 
 For HTML, it generates `<span id="markName" />` which you
 can then draw to with [a convenient JavaScript](https://stackoverflow.com/questions/554167/drawing-arrows-on-an-html-page-to-visualize-semantic-links-between-textual-spans#623770).
@@ -459,7 +467,7 @@ can then draw to with [a convenient JavaScript](https://stackoverflow.com/questi
 Please note that using alternate lexers
 disables token replacement!
 This is important, since the token replacement
-to LaTeX special symbols is language-specific.
+to \LaTeX{} special symbols is language-specific.
 
 #### Indent only
 
@@ -505,33 +513,38 @@ The token type is different, but we only ever compare it by equality.
 
 ## Finding Haskell tokens
 
-https://hackage.haskell.org/package/ghc-syntax-highlighter-0.0.6.0/docs/GHC-SyntaxHighlighter.html
+We find Haskell tokens with GHC-lib that uses GHC parser itself.
+For simplicity we use [`ghc-syntax-highlighter`](https://hackage.haskell.org/package/ghc-syntax-highlighter-0.0.6.0/docs/GHC-SyntaxHighlighter.html)
+We readd locations after the fact, since it gives you pure tokens with text and spaces,
+or pure locations (without text).
+
 ```
-tokenizeHaskellLoc :: Text -> Maybe [(Token, Loc)]
+tokenizeHaskell :: Text -> Maybe [(Token, Text)]
 ```
 
-## LaTeX output
-1. For escaping text in TeX:
-http://hackage.haskell.org/package/HaTeX-3.5/docs/Text-LaTeX-Base-Render.html#t:Render
+## \LaTeX{} output
 
-`Render Text` in particular
+For escaping text in TeX we use [HaTeX](http://hackage.haskell.org/package/HaTeX-3.5/docs/Text-LaTeX-Base-Render.html#t:Render)[@hatex]
 
-2. For tables:
-* https://hackage.haskell.org/package/HaTeX-3.22.2.0/docs/Text-LaTeX-Packages-Multirow.html
-* if not:
-  - add one to LaTeX:
-    * `multicol`
-    * `polytable`
+We render tables inline tables with `multicolumn` (not `polytable` like lhs2TeX[@lhs2tex] does.)
+
+We do not use [HaTeX table support](https://hackage.haskell.org/package/HaTeX-3.22.2.0/docs/Text-LaTeX-Packages-Multirow.html) yet.
 
 ## Debugging
 
-The best debugging would be using the filter in different modes.
-Pandoc can automatically detect output format:
+Pandoc can automatically detect output format.
+In order to get \LaTeX{} and HTML output just run:
+
 ```sh
-pandoc input.md --filter=pandoc-filter-indent -o output.html
 pandoc input.md --filter=pandoc-filter-indent -o output.tex
 pandoc input.md --filter=pandoc-filter-indent -o output.pdf
 ```
 
+For debugging indentation use `text` output format:
+```
+pandoc input.md --filter=pandoc-filter-indent -o output.txt
+```
+In text mode, it renders indent boundaries as `|` and `^`.
+
 Note that the filter *does not* touch the text outside code blocks.
-It can however add necessary LaTeX headers or HTML styles in meta `headers-include`.
+It can add necessary \LaTeX{} headers or HTML styles in meta `headers-include`.
