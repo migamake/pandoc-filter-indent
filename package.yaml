@@ -1,6 +1,6 @@
 name:                pandoc-filter-indent
 version:             0.1.0.0
-github:              "mjgajda/pandoc-filter-indent"
+github:              "mgajda/pandoc-filter-indent"
 license:             BSD3
 author:              "Michał J. Gajda"
 maintainer:          "mjgajda@migamake.com"
@@ -25,7 +25,7 @@ description: |
   and creates tabular code structures from indentation.
   It uses GHC lexer to assure that latest features are always parsed correctly.
   .
-  Please see the README on GitHub at <https://github.com/mjgajda/pandoc-filter-indent#readme>
+  Please see the README on GitHub at <https://github.com/mgajda/pandoc-filter-indent#readme>
 
 extra-source-files:
 - README.md
