@@ -1,6 +1,6 @@
 ---
 title: "Code typesetting made simple"
-subtitle: "Project description"
+subtitle: "Pandoc filter"
 description: |
   To build this document use:
 
