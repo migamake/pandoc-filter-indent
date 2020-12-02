@@ -3,7 +3,6 @@
 module Render.Latex(latexFromColSpans) where
 
 import Data.Text(Text)
-import Data.Char(isSpace)
 import qualified Data.Text as T
 import Text.LaTeX.Base.Syntax(protectText)
 

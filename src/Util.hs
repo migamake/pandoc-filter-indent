@@ -8,19 +8,12 @@
 {-# LANGUAGE FlexibleContexts      #-}
 module Util where
 
-import Text.Pandoc.JSON
-import Text.Pandoc.Definition ()
 import Data.Function(on)
-import Data.String (fromString, IsString)
-import Data.Text (Text)
 import qualified Data.Text as T
-import Data.List(groupBy, sortBy, sort, group)
+import Data.List(groupBy, sortBy)
 import Data.Maybe(fromMaybe)
 import Prelude hiding(getLine)
-import Optics.Core
-import Data.Tuple.Optics
-import Data.Tuple.Optics
-import Data.Text.Lazy.Builder
+import Optics.Core ( Lens, lens )
 
 import Token(MyTok(..))
 

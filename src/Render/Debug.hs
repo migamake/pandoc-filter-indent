@@ -1,23 +1,20 @@
 {-# LANGUAGE AllowAmbiguousTypes   #-}
 {-# LANGUAGE OverloadedStrings     #-}
 {-# LANGUAGE PartialTypeSignatures #-}
-{-# LANGUAGE TupleSections         #-}
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE FlexibleContexts      #-}
+-- | Renders alignment to text with alignment markers,
+--   for debugging purposes.
 module Render.Debug(render) where
 
-import Data.Function(on)
-import Data.String (fromString, IsString)
 import Data.Text (Text)
 import qualified Data.Text as T
-import Data.List(groupBy, sortBy, sort, group)
-import Data.Maybe(fromMaybe)
 import Prelude hiding(getLine)
-import Optics.Core
+import Optics.Core ( view )
 
-import FindColumns
-import Alignment
-import Util
+import FindColumns ( alignPos, getCol, tableColumns )
+import Alignment ( textContent, Align(..), Processed )
+import Util ( safeTail )
 
 insertAt       :: Show a => Int -> a -> [a] -> [a]
 insertAt i e ls = case maybeInsertAt i e ls of
@@ -55,10 +52,7 @@ textWithMarkers tColumns nextCol tok =
     T.pack $ insertMarkers unaccountedMarkers $ T.unpack $ view textContent tok
   where
     insertMarkers []   txt = txt
-    insertMarkers mrks txt = --(\result -> trace ("insertMarkers " <> show mrks <> " " <> show txt <> " => " <> result) result)
-                             foldr insertMarker txt
-                           $ -- trace (show unaccountedMarkers)
-                             mrks
+    insertMarkers mrks txt = foldr insertMarker txt mrks
 
     insertMarker index = insertAt index '.'
     unaccountedMarkers = fmap (-getCol tok+)

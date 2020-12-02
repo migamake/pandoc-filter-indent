@@ -1,17 +1,11 @@
-{-# LANGUAGE OverloadedStrings     #-}
-{-# LANGUAGE PartialTypeSignatures #-}
-{-# LANGUAGE ViewPatterns          #-}
-{-# LANGUAGE TypeSynonymInstances  #-}
-{-# LANGUAGE FlexibleInstances     #-}
-{-# LANGUAGE FlexibleContexts      #-}
+{-# LANGUAGE FlexibleContexts #-}
 module Alignment where
 
 import Data.Text (Text)
 import Data.Tuple.Optics
 import Optics.Lens
 
-import Token
-import Tuples
+import Token ( MyLoc, MyTok )
 
 -- | Datatype to present columns with alignment requirements.
 data Align =

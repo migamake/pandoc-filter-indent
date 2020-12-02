@@ -5,40 +5,26 @@
 module Render.ColSpan where
 
 import Data.Function(on)
-import Data.String (fromString, IsString)
 import Data.Text (Text)
-import qualified Data.Text as T
 import Data.List(groupBy, sortBy)
-import Data.Maybe(fromMaybe)
 import Prelude hiding(getLine)
-import Optics.Core ( Field1(_1), Field2(_2), view, (%), lens )
-import Data.Tuple.Optics ( Field1(_1), Field2(_2) )
+import Optics.Core ( Field1(_1), Field2(_2), view, (%))
 
 import Alignment
-import FindColumns
+    ( textContent, tokenType, Align(ALeft), Processed )
+import FindColumns ( alignPos, getLine, getLineCol )
 import Token(MyTok)
-import Util
+import Util ( maybeLens )
 
 type TokensWithColSpan = ([(MyTok, Text)], Int, Align)
---type TextWithColSpan = (Text, Int, [Processed])
-
---extractTexts :: [[TextWithColSpan]] -> [[_]]
-{-extractTexts ps = fmap extractText <$> ps
-  where
-    maxCol :: Int
-    maxCol = maximum $ map getAlignCol $ ps
-    extractText (tok:toks, colspan) = (T.concat (view textContent <$> (tok:toks))
-                                      ,colspan
-                                      ,view (alignPos % maybeLens (ALeft,-1) % _1) tok)
- -}
 
 -- | Find colspan parameters
 colspans   :: [Processed] -> [[TokensWithColSpan]]
-colspans ps = fmap ( fmap extractTokens
-                   . addColSpans
-                   . groupBy sameColSpan )
-            $ groupBy ((==) `on` getLine)
-            $ sortBy (compare `on` getLineCol) ps
+colspans ps = fmap ( fmap extractTokens -- extract token and text content from each record
+                   . addColSpans -- add colspan length in alignment columns
+                   . groupBy sameColSpan ) -- group colspans
+            $ groupBy ((==)    `on` getLine) -- group lines
+            $ sortBy  (compare `on` getLineCol) ps
   where
     maxCol :: Int
     maxCol = maximum $ map getAlignCol $ ps
