@@ -56,6 +56,7 @@ executables:
     dependencies:
     - pandoc-filter-indent
     - optparse-applicative
+    - containers
 
 tests:
   pandoc-filter-indent-test:

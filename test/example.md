@@ -3,6 +3,7 @@ title: "Running example"
 author: "Michał J. Gajda"
 header-includes:
   - \usepackage{scalerel}
+inline-code: "haskell"
 ---
 
 The example input is here:
