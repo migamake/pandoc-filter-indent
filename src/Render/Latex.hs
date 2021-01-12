@@ -46,11 +46,13 @@ wrapTable cols txt =
            -- ,"\\setlength{\\tabcolsepBACKUP}{\\tabcolsep}"
             "\\setlength{\\tabcolsep}{1pt}\n"
           , "\\begin{tabular}{"
-          , T.replicate (cols+3) "l" -- FIXME: tests for correct number of columns
+          , T.replicate (cols+1+workaround) "l" -- FIXME: tests for correct number of columns
           , "}\n"
           , txt, "\n\\end{tabular}"
            --,"\\setlength{\\tabcolsep}{\\tabcolsepBACKUP}"
           ]
+  where
+    workaround = 10 -- temporary workaround for incorrect inference of number of columns
 
 -- Decrease column spacing: \\setlength{\\tabcolsep}{1ex}
 -- TODO: braced operators
@@ -73,7 +75,7 @@ formatTokens  = T.concat
 formatToken :: (MyTok, Text) -> Text
 formatToken (TOperator,unbrace -> Just op) = "(" <> formatToken (TOperator, op) <> ")"
 formatToken (TKeyword, "forall") = mathop "forall"
-formatToken (TVar,     "mempty") = mathop "emptyset"
+--formatToken (TVar,     "mempty") = mathop "emptyset"
 formatToken (TVar,     "bottom") = mathop "bot"
 formatToken (TVar,  "undefined") = mathop "perp"
 formatToken (TVar,     "top"   ) = mathop "top"
@@ -94,8 +96,8 @@ formatToken (TOperator,"||"    ) = mathop "parallel"
 formatToken (TOperator,"|>"    ) = mathop "triangleright"
 formatToken (TOperator,">>"    ) = mathop "mathbin{>\\!\\!\\!>}" -- gg
 formatToken (TOperator,">>>"   ) = mathop "mathbin{>\\!\\!\\!>\\!\\!\\!>}" -- gg
-formatToken (TOperator,">>"    ) = mathop "gg"
-formatToken (TOperator,">>>"   ) = mathop "ggg"
+--formatToken (TOperator,">>"    ) = mathop "gg"
+--formatToken (TOperator,">>>"   ) = mathop "ggg"
 formatToken (TOperator,"<<"    ) = mathop "ll"
 formatToken (TOperator,"<<<"   ) = mathop "lll"
 formatToken (TOperator,"-<"    ) = mathop "prec"

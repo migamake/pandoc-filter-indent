@@ -1,6 +1,8 @@
 ---
 title: "Running example"
 author: "Michał J. Gajda"
+header-includes:
+  - \usepackage{scalerel}
 ---
 
 The example input is here:

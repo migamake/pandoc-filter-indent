@@ -5,7 +5,7 @@
 module Token.Haskell(tokenizer) where
 
 import Control.Arrow(first)
-import Text.Pandoc.JSON
+import Text.Pandoc.JSON ()
 import Text.Pandoc.Definition ()
 import Data.Function(on)
 import Data.Maybe(fromMaybe, isJust)
@@ -17,8 +17,11 @@ import Debug.Trace(trace)
 import Prelude hiding(getLine)
 
 import GHC.SyntaxHighlighter
+    ( tokenizeHaskell
+    , Loc(..)
+    , Token(..) )
 
-import Token
+import Token ( MyLoc(MyLoc), MyTok(..), unTikzMark )
 
 -- * Haskell tokenizer frontend
 -- | Attempt to tokenize input,
@@ -36,12 +39,14 @@ tokenizer  = fmap ( joinEscapedOperators
 -- | Recognize token using both token type from `ghc-lib`,
 --   and text content.
 --   Only TikZ marks are recognized by looking up text content.
+recognizeToken :: (Token, Text) -> (MyTok, Text)
 recognizeToken (CommentTok, tokText@(unTikzMark -> Just mark)) =
   (TTikz mark,           tokText)
 recognizeToken (tokType, tokText) =
   (haskellTok   tokType, tokText)
 
 -- | Convert token type of `ghc-lib` into tokens recognized by the filter.
+haskellTok :: Token -> MyTok
 haskellTok SpaceTok       = TBlank
 haskellTok CommentTok     = TBlank
 haskellTok PragmaTok      = TBlank
@@ -54,8 +59,10 @@ haskellTok IntegerTok     = TNum
 haskellTok t              = TOther
 
 -- | Extract line number from `ghc-lib` slice location.
+locLine :: Loc -> Int
 locLine (Loc startLineNo startColNo _ _) = startLineNo
 -- | Extract column number from `ghc-lib` slice location.
+locCol :: Loc -> Int
 locCol  (Loc startLineNo startColNo _ _) = startColNo
 
 -- | Split tokens into one blank per line.
@@ -79,8 +86,15 @@ splitTokens = mconcat
         mkEntry i t = (TBlank, MyLoc i 1, t)
     splitter  other             = [other]
 
+joinEscapedOperators :: (Eq c, IsString c, Semigroup c) => [(MyTok, b, c)] -> [(MyTok, b, c)]
 joinEscapedOperators ((TOperator, loc, "("):(TOperator, _, op):(TOperator, _, ")"):rest) =
    (TOperator, loc, "(" <> op <> ")"):joinEscapedOperators rest
+joinEscapedOperators ((TOperator, loc, "`"):(TVar, _, op):(TOperator, _, "`"):rest) =
+   (TOperator, loc, "`" <> op <> "`"):joinEscapedOperators rest
+joinEscapedOperators ((TOperator, loc, "("):(TOperator, _, op):rest) =
+   (TOperator, loc, "(" <> op):joinEscapedOperators rest
+joinEscapedOperators ((TOperator, loc, op):(TOperator, _, ")"):rest) =
+   (TOperator, loc, op <> ")"):joinEscapedOperators rest
 joinEscapedOperators (tok:rest) = tok:joinEscapedOperators rest
 joinEscapedOperators []         = []
 

@@ -32,6 +32,7 @@ data MyTok =
   | TNum
   | TOther
   | TTikz  Text -- TikZmark in a comment
+  | TMulti -- multi token
   deriving (Eq, Ord, Show)
 
 -- | Records tokenized and converted to common token format.

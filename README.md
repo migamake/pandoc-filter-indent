@@ -371,8 +371,8 @@ For finding the right symbol replacements use:
    - and operators in standard type classes:
      * `Control.Monad`: `>>=`, `>>`, `>=>` 
      * `Control.Alternative`: `<|>`
-     * `Control.Functor`: `<*>`
-     * `Control.Applicative`: `<*>`, `<*`, and `*>`
+     * `Control.Functor`: `<$>`
+     * `Control.Applicative`: `<*>`, `<$>`, `<*`, and `*>`
      * `Data.Semigroup.<>` shown as $\diamond$
      * `Data.Ord`: `/=`, `>=`, `<=`, `>`, `<`
      * `Num`: `+`, `-`, `*`, `/`,
