@@ -32,6 +32,8 @@ class Eq      a
    (>=)    :: a -> a -> Bool
 ```
 
+Inline `<>` quote is here.
+
 ```{.haskell}
 test :: forall a. a -> b -> c -> d -> e
 test = do

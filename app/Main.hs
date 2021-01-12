@@ -1,22 +1,24 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ViewPatterns      #-}
 {-# LANGUAGE RecordWildCards   #-}
+{-# LANGUAGE NamedFieldPuns    #-}
 module Main where
 
 import           Text.Pandoc.JSON
+import           Text.Pandoc.Walk       (walk)
 import           Text.Pandoc.Definition ()
-import           Data.String (fromString, IsString)
-import           Data.Maybe  (fromMaybe)
-import           Data.Text   (Text)
+import           Data.String            (fromString, IsString)
+import           Data.Maybe             (fromMaybe)
+import           Data.Text              (Text)
 import qualified Data.Text as T
 
-import Debug.Trace(trace)
-
-import Token.Haskell(tokenizer)
-import Filter(renderBlock, renderInline)
-import FindColumns(findColumns)
-import Alignment(Processed)
-import Opts
+import           Debug.Trace            (trace)
+              
+import           Token.Haskell          (tokenizer)
+import           Filter                 (renderBlock, renderInline)
+import           FindColumns            (findColumns)
+import           Alignment              (Processed)
+import           Opts
 
 main :: IO ()
 main = do
@@ -28,21 +30,28 @@ blockFormatter :: Options -> Format -> Block -> Block
 blockFormatter _opts format (CodeBlock attrs content) =
     codeFormatter blockRenderer format attrs content
 -- Do not touch other blocks than 'CodeBock'
-blockFormatter _opts _       x                        = x
+blockFormatter opts  format x                         =
+    walk (inlineFormatter opts format) x
 
 inlineFormatter :: Options -> Format -> Inline -> Inline
-inlineFormatter  _opts format (Code    attrs txt    ) =
-  codeFormatter inlineRenderer format attrs txt
+inlineFormatter  Options {inlineSyntax} format (Code    attrs txt    ) =
+    codeFormatter inlineRenderer format (addClass attrs) txt
+  where
+      addClass (a, classes, b) | inlineSyntax /= "" = (a, inlineSyntax:classes, b)
+      addClass  o                                   = o
 inlineFormatter _opts _       x                       = x
 
+-- | Renderer for the correctly processed fragments.
 data Renderer a = Renderer {
     renderSuccess  :: Format -> Attr -> [Processed] -> a
-  , renderFallback ::           Attr -> Text        -> a
+  , renderFallback ::           Attr ->  Text       -> a
   }
 
+-- | Rendering inline elements
 inlineRenderer :: Renderer Inline
 inlineRenderer = Renderer renderInline Code
 
+-- | Rendering block elements
 blockRenderer :: Renderer Block
 blockRenderer  = Renderer renderBlock  CodeBlock
 
