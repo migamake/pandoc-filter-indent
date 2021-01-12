@@ -87,13 +87,15 @@ splitTokens = mconcat
     splitter  other             = [other]
 
 joinEscapedOperators :: (Eq c, IsString c, Semigroup c) => [(MyTok, b, c)] -> [(MyTok, b, c)]
-joinEscapedOperators ((TOperator, loc, "("):(TOperator, _, op):(TOperator, _, ")"):rest) =
+joinEscapedOperators ((TOther, loc, "("):(TOperator, _, op):(TOther, _, ")"):rest) =
    (TOperator, loc, "(" <> op <> ")"):joinEscapedOperators rest
-joinEscapedOperators ((TOperator, loc, "`"):(TVar, _, op):(TOperator, _, "`"):rest) =
+joinEscapedOperators ((TOther, loc, "("):(TOther, _, op):(TOther, _, ")"):rest) =
+   (TOperator, loc, "(" <> op <> ")"):joinEscapedOperators rest
+joinEscapedOperators ((TOther, loc, "`"):(TVar, _, op):(TOther, _, "`"):rest) =
    (TOperator, loc, "`" <> op <> "`"):joinEscapedOperators rest
-joinEscapedOperators ((TOperator, loc, "("):(TOperator, _, op):rest) =
+joinEscapedOperators ((TOther, loc, "("):(TOperator, _, op):rest) =
    (TOperator, loc, "(" <> op):joinEscapedOperators rest
-joinEscapedOperators ((TOperator, loc, op):(TOperator, _, ")"):rest) =
+joinEscapedOperators ((TOperator, loc, op):(TOther, _, ")"):rest) =
    (TOperator, loc, op <> ")"):joinEscapedOperators rest
 joinEscapedOperators (tok:rest) = tok:joinEscapedOperators rest
 joinEscapedOperators []         = []

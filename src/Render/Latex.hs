@@ -80,7 +80,8 @@ formatToken (TVar,     "bottom") = mathop "bot"
 formatToken (TVar,  "undefined") = mathop "perp"
 formatToken (TVar,     "top"   ) = mathop "top"
 formatToken (TVar,     "not"   ) = mathop "neg"
-formatToken (TOperator,">>="   ) = mathop "mathbin{>\\!\\!\\!>\\!\\!=}" -- from lhs2TeX, Neil Mitchell's
+--formatToken (TOperator,">>="   ) = mathop "mathbin{>\\!\\!\\!>\\!\\!=}" -- from lhs2TeX, Neil Mitchell's
+formatToken (TOperator,">>="   ) = mathop "mathbin{\\gg\\!\\!=}" -- from lhs2TeX, Neil Mitchell's
 formatToken (TOperator,"=<<"   ) = mathop "mathbin{=\\!\\!<\\!\\!\\!<}" -- from lhs2TeX, Neil Mitchell's
 formatToken (TOperator,">=>"   ) = mathop "mathbin{>\\!\\!=\\!\\!\\!>}"
 formatToken (TOperator,"|-"    ) = mathop "vdash"
@@ -94,21 +95,24 @@ formatToken (TCons    ,"Natural") = mathop "N"
 formatToken (TOperator,"|"     ) = mathop "vert"
 formatToken (TOperator,"||"    ) = mathop "parallel"
 formatToken (TOperator,"|>"    ) = mathop "triangleright"
-formatToken (TOperator,">>"    ) = mathop "mathbin{>\\!\\!\\!>}" -- gg
-formatToken (TOperator,">>>"   ) = mathop "mathbin{>\\!\\!\\!>\\!\\!\\!>}" -- gg
---formatToken (TOperator,">>"    ) = mathop "gg"
---formatToken (TOperator,">>>"   ) = mathop "ggg"
+--formatToken (TOperator,">>"    ) = mathop "mathbin{>\\!\\!\\!>}" -- gg
+--formatToken (TOperator,">>>"   ) = mathop "mathbin{>\\!\\!\\!>\\!\\!\\!>}" -- gg
+formatToken (TOperator,">>"    ) = mathop "gg"
+formatToken (TOperator,">>>"   ) = mathop "ggg"
 formatToken (TOperator,"<<"    ) = mathop "ll"
 formatToken (TOperator,"<<<"   ) = mathop "lll"
-formatToken (TOperator,"-<"    ) = mathop "prec"
+--formatToken (TOperator,"-<"    ) = mathop "prec"
+formatToken (TOther,   "-<"    ) = mathop "prec"
+formatToken (TOther,   ">-"    ) = mathop "succ"
 formatToken (TOperator,"\\\\"  ) = mathop "setminus"
-formatToken (TOperator,"<-"    ) = mathop "gets"
+formatToken (TOther   ,"<-"    ) = mathop "gets"
 formatToken (TOperator,">="    ) = mathop "geq"
 formatToken (TOperator,"<="    ) = mathop "leq"
 formatToken (TOperator,"!="    ) = mathop "ne"
 formatToken (TOperator,"<->"   ) = mathop "leftrightarrow"
-formatToken (TOperator,"->"    ) = mathop "to"
-formatToken (TOperator,"=>"    ) = mathop "Rightarrow"
+--formatToken (TOperator,"->"    ) = mathop "to"
+formatToken (TOther,   "->"    ) = mathop "to"
+formatToken (TOther,   "=>"    ) = mathop "Rightarrow"
 formatToken (TOperator,"==>"   ) = mathop "implies"
 formatToken (TOperator,"|->"   ) = mathop "mapsto"
 --formatToken (TOperator,"|=>"   ) = mathop "Mapsto" -- not in amssymb
