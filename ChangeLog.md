@@ -4,6 +4,7 @@
 ## Unreleased changes
 
 0.2.2.0 Jan 12 2020
+  - Inline code formatting
   - Removed indent marks from parenthesised operators: "`(+)"
   - Removed indent marks from functions promoted to operators like "`mappend`"
 
