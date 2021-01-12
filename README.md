@@ -402,6 +402,12 @@ This mapping should be easily changed in a single place in code.
 
 _Please let me know if there is a question about any other token types!_
 
+## Formatting inline code
+
+To format inline code we lookup `inline-code` in YAML metadata,
+and append it to attributes of each inline code fragment.
+By default it is `haskell`.
+
 ## Safe escaping
 
 In order to safely escape strings, we keep token type
