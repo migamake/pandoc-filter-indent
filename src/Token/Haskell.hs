@@ -4,16 +4,11 @@
 -- | Haskell code tokenizer
 module Token.Haskell(tokenizer) where
 
-import Control.Arrow(first)
 import Text.Pandoc.JSON ()
 import Text.Pandoc.Definition ()
-import Data.Function(on)
-import Data.Maybe(fromMaybe, isJust)
-import Data.String (fromString, IsString)
+import Data.String (IsString)
 import Data.Text (Text)
 import qualified Data.Text as T
-import Data.List(groupBy, sortBy)
-import Debug.Trace(trace)
 import Prelude hiding(getLine)
 
 import GHC.SyntaxHighlighter

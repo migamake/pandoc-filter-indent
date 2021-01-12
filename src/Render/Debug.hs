@@ -26,7 +26,7 @@ insertAt i e ls = case maybeInsertAt i e ls of
 maybeInsertAt :: Int -> a -> [a] -> Maybe [a]
 maybeInsertAt 0 e    ls  = pure $ e:ls
 maybeInsertAt i e (l:ls) = (l:) <$> maybeInsertAt (i-1) e ls
-maybeInsertAt i e    []  = Nothing
+maybeInsertAt _ _    []  = Nothing
 
 -- | Render text of code blocks
 --   with marker columns inserted

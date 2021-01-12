@@ -7,19 +7,16 @@ module Main where
 import           Text.Pandoc.JSON
 import           Text.Pandoc.Walk       (walk)
 import           Text.Pandoc.Definition ()
-import           Data.String            (fromString, IsString)
+import           Data.String            (IsString)
 import           Data.Maybe             (fromMaybe)
 import qualified Data.Map  as Map
-import           Data.Text              (Text)
+import           Data.Text(Text)
 import qualified Data.Text as T
-
-import           Debug.Trace            (trace)
               
 import           Token.Haskell          (tokenizer)
 import           Filter                 (renderBlock, renderInline)
 import           FindColumns            (findColumns)
 import           Alignment              (Processed)
---import           Opts
 
 data Options = Options {
     inlineSyntax :: Text
@@ -28,12 +25,13 @@ data Options = Options {
 main :: IO ()
 main = toJSONFilter $ runner
 
+runner :: Maybe Format -> Pandoc -> Pandoc
 runner (fromMaybe (Format "text") -> format) input@(Pandoc (Meta meta) _) =
     walk (blockFormatter opts format) input
   where
     opts = case Map.lookup "inline-code" meta of
       Nothing                    -> Options "haskell" -- default
-      Just (MetaString       s)  -> Options s
+      Just (MetaString       s)  -> Options s -- never needed?
       Just (MetaInlines [Str s]) -> Options s
       Just  otherValue           -> error $ "inline-code: meta should be a string but is: " <> show otherValue
 
