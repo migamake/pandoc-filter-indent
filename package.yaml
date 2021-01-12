@@ -55,6 +55,7 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - pandoc-filter-indent
+    - optparse-applicative
 
 tests:
   pandoc-filter-indent-test:
