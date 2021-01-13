@@ -1,6 +1,7 @@
 {-# LANGUAGE OverloadedStrings     #-}
 {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE ViewPatterns          #-}
+{-# LANGUAGE FlexibleContexts      #-}
 -- | Haskell code tokenizer
 module Token.Haskell(tokenizer) where
 
@@ -10,13 +11,14 @@ import Data.String (IsString)
 import Data.Text (Text)
 import qualified Data.Text as T
 import Prelude hiding(getLine)
+import Optics.Core
 
 import GHC.SyntaxHighlighter
     ( tokenizeHaskell
     , Loc(..)
     , Token(..) )
 
-import Token ( MyLoc(MyLoc), MyTok(..), unTikzMark )
+import Token ( MyLoc(MyLoc), MyTok(..), unTikzMark, mark )
 
 -- * Haskell tokenizer frontend
 -- | Attempt to tokenize input,
@@ -81,18 +83,20 @@ splitTokens = mconcat
         mkEntry i t = (TBlank, MyLoc i 1 False, t)
     splitter  other             = [other]
 
+
+unmark :: Field2 a a MyLoc MyLoc => a -> a
+unmark = set (_2 % mark) False
+
 -- FIXME: use no-indent-mark instead.
-joinEscapedOperators :: (Eq c, IsString c, Semigroup c) => [(MyTok, b, c)] -> [(MyTok, b, c)]
-joinEscapedOperators ((TOther, loc, "("):(TOperator, _, op):(TOther, _, ")"):rest) =
-   (TOperator, loc, "(" <> op <> ")"):joinEscapedOperators rest
-joinEscapedOperators ((TOther, loc, "("):(TOther, _, op):(TOther, _, ")"):rest) =
-   (TOperator, loc, "(" <> op <> ")"):joinEscapedOperators rest
-joinEscapedOperators ((TOther, loc, "`"):(TVar, _, op):(TOther, _, "`"):rest) =
-   (TOperator, loc, "`" <> op <> "`"):joinEscapedOperators rest
-joinEscapedOperators ((TOther, loc, "("):(TOperator, _, op):rest) =
-   (TOperator, loc, "(" <> op):joinEscapedOperators rest
-joinEscapedOperators ((TOperator, loc, op):(TOther, _, ")"):rest) =
-   (TOperator, loc, op <> ")"):joinEscapedOperators rest
+joinEscapedOperators :: (Eq c, IsString c, Semigroup c) => [(MyTok, MyLoc, c)] -> [(MyTok, MyLoc, c)]
+joinEscapedOperators (a@(_, _, "("):b@(_, _, _):c@(_, _, ")"):rest) =
+   a:unmark b:unmark c:joinEscapedOperators rest
+joinEscapedOperators (a@(_,    loc, "`"):b@(_, _, _):c@(_, _, "`"):rest) =
+   a:unmark b:unmark c:joinEscapedOperators rest
+joinEscapedOperators (a@(_, _, "("):b@(TOperator, _, _):rest) =
+   a:unmark b:joinEscapedOperators rest
+joinEscapedOperators (a@(_, _, _):b@(_, _, ")"):rest) =
+   a:unmark b:joinEscapedOperators rest
 joinEscapedOperators (tok:rest) = tok:joinEscapedOperators rest
 joinEscapedOperators []         = []
 
