@@ -68,3 +68,5 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - pandoc-filter-indent
+    - QuickCheck
+    - quickcheck-text

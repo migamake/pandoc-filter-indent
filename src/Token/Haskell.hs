@@ -62,44 +62,6 @@ locLine (Loc startLineNo startColNo _ _) = startLineNo
 locCol :: Loc -> Int
 locCol  (Loc startLineNo startColNo _ _) = startColNo
 
--- | Split tokens into one blank per line.
--- TESTME: assures that no token has '\n' before the end of text.
-splitTokens :: [(MyTok, MyLoc, Text)] -> [(MyTok, MyLoc, Text)]
-splitTokens = mconcat
-            . fmap splitter
-  where
-    splitter :: (MyTok, MyLoc, Text) -> [(MyTok, MyLoc, Text)]
-    splitter (TBlank, loc@(MyLoc line _ _), txt) | T.filter (=='\n') txt /= "" =
-        withLocs withNewLines
-      where
-        split, withNewLines :: [Text]
-        split = T.lines txt
-        withNewLines = fmap (<>"\n") (init split)
-                    <> [last split]
-        withLocs :: [Text] -> [(MyTok, MyLoc, Text)]
-        withLocs (l:ls) = (TBlank, loc, l)
-                        : zipWith mkEntry [line+1..] ls
-        mkEntry :: Int -> Text -> (MyTok, MyLoc, Text)
-        mkEntry i t = (TBlank, MyLoc i 1 False, t)
-    splitter  other             = [other]
-
-
-unmark :: Field2 a a MyLoc MyLoc => a -> a
-unmark = set (_2 % mark) False
-
--- FIXME: use no-indent-mark instead.
-joinEscapedOperators :: (Eq c, IsString c, Semigroup c) => [(MyTok, MyLoc, c)] -> [(MyTok, MyLoc, c)]
-joinEscapedOperators (a@(_, _, "("):b@(_, _, _):c@(_, _, ")"):rest) =
-   a:unmark b:unmark c:joinEscapedOperators rest
-joinEscapedOperators (a@(_,    loc, "`"):b@(_, _, _):c@(_, _, "`"):rest) =
-   a:unmark b:unmark c:joinEscapedOperators rest
-joinEscapedOperators (a@(_, _, "("):b@(TOperator, _, _):rest) =
-   a:unmark b:joinEscapedOperators rest
-joinEscapedOperators (a@(_, _, _):b@(_, _, ")"):rest) =
-   a:unmark b:joinEscapedOperators rest
-joinEscapedOperators (tok:rest) = tok:joinEscapedOperators rest
-joinEscapedOperators []         = []
-
 -- | Restore locations
 -- TESTME: test
 -- 1. Without newlines should return a list of indices up to length
@@ -123,4 +85,44 @@ restoreLocations = go 1 1
                                 $ fst
                                 $ T.break (=='\n')
                                 $ T.reverse txt
+
+-- * Likely common with other tokenizers
+-- | Split tokens into one blank per line.
+-- TESTME: assures that no token has '\n' before the end of text.
+splitTokens :: [(MyTok, MyLoc, Text)] -> [(MyTok, MyLoc, Text)]
+splitTokens = mconcat
+            . fmap splitter
+  where
+    splitter :: (MyTok, MyLoc, Text) -> [(MyTok, MyLoc, Text)]
+    splitter (TBlank, loc@(MyLoc line _ _), txt) | T.filter (=='\n') txt /= "" =
+        withLocs withNewLines
+      where
+        split, withNewLines :: [Text]
+        split = T.lines txt
+        withNewLines = fmap (<>"\n") (init split)
+                    <> [last split]
+        withLocs :: [Text] -> [(MyTok, MyLoc, Text)]
+        withLocs (l:ls) = (TBlank, set mark True $ loc, l)
+                        : zipWith mkEntry [line+1..] ls
+        mkEntry :: Int -> Text -> (MyTok, MyLoc, Text)
+        mkEntry i t = (TBlank, MyLoc i 1 True, t)
+    splitter other@(_, loc@(MyLoc line 1 x), txt) = [set (_2 % mark) True other]
+    splitter other                                = [other]
+
+
+unmark :: Field2 a a MyLoc MyLoc => a -> a
+unmark = set (_2 % mark) False
+
+-- FIXME: use no-indent-mark instead.
+joinEscapedOperators :: (Eq c, IsString c, Semigroup c) => [(MyTok, MyLoc, c)] -> [(MyTok, MyLoc, c)]
+joinEscapedOperators (a@(_, _, "("):b@(_, _, _):c@(_, _, ")"):rest) =
+   a:unmark b:unmark c:joinEscapedOperators rest
+joinEscapedOperators (a@(_,    loc, "`"):b@(_, _, _):c@(_, _, "`"):rest) =
+   a:unmark b:unmark c:joinEscapedOperators rest
+joinEscapedOperators (a@(_, _, "("):b@(TOperator, _, _):rest) =
+   a:unmark b:joinEscapedOperators rest
+joinEscapedOperators (a@(_, _, _):b@(_, _, ")"):rest) =
+   a:unmark b:joinEscapedOperators rest
+joinEscapedOperators (tok:rest) = tok:joinEscapedOperators rest
+joinEscapedOperators []         = []
 

@@ -34,7 +34,10 @@ data MyTok =
   deriving (Eq, Ord, Show)
 
 -- | Records tokenized and converted to common token format.
-type Tokenized = (MyTok, MyLoc, Text)
+type Tokenized = (MyTok -- ^ Token type
+                 ,MyLoc -- ^ Starting location for the token
+                 ,Text  -- ^ text value of the token
+                 )
 
 -- | Unpack a Haskell comment with a TikZ mark indicator.
 unTikzMark    :: Text -> Maybe Text

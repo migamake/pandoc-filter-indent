@@ -44,7 +44,7 @@ colspans ps = fmap ( fmap extractTokens -- extract token and text content from e
       where
         nextCol = getAlignCol $ head c
     getAlign :: Processed -> Align
-    getAlign = view (alignPos % maybeLens (ALeft, 0) % _1)
+    getAlign = view (alignPos % maybeLens (ALeft, 1) % _1)
     extractTokens (a,b,c) = (extractToken <$> a, b, c)
     extractToken tok = (view tokenType tok, view textContent tok)
 -- FIXME: split lines before colspans!

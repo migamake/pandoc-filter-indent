@@ -18,7 +18,15 @@ data Align =
   deriving (Eq, Ord, Show)
 
 -- | Records tokenized and converted to common token format.
-type Processed = (MyTok, MyLoc, Text, Maybe Int, Maybe (Align, Int))
+type Processed = (MyTok -- ^ Token type
+                 ,MyLoc -- ^ Token location
+                 ,Text  -- ^ Text content
+                 ,Maybe Int -- ^ Indent column
+                 ,Maybe (Align -- ^ Alignment mark
+                        ,Int)  -- ^ Alignment column
+                 )
+
+ 
 
 -- | Access text content.
 tokenType :: Field1 a a MyTok MyTok => Lens' a MyTok

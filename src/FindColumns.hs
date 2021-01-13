@@ -25,14 +25,16 @@ import Util
 import Debug.Trace
 
 -- | Records tokenized and converted to common token format.
-type Unanalyzed = (MyTok, MyLoc, Text, Maybe Int             )
+type Unanalyzed = (MyTok, MyLoc, Text
+                  , Maybe Int -- ^ Indent for entire line
+                  )
 
 -- | Records aligned, but without column numbers yet.
-type Aligned   = (MyTok       -- token type
-                 ,MyLoc       -- text start location
-                 ,Text        -- text content
-                 ,Maybe Int   -- indent in this column
-                 ,Maybe Align -- alignment
+type Aligned   = (MyTok       -- ^ token type
+                 ,MyLoc       -- ^ text start location
+                 ,Text        -- ^ text content
+                 ,Maybe Int   -- ^ indent in this column
+                 ,Maybe Align -- ^ alignment
                  )
 
 -- * Definitions of fields accessible at many stages
@@ -125,6 +127,7 @@ withExtraColumns x = (x, extraColumns x)
 
 -- | Compute all alignment columns existing and their positions in the text column space.
 -- TEST: check that we always have correct number of columns
+-- FIXME: known bug that may be caused by this one
 tableColumns :: Field2 a a  MyLoc     MyLoc
              => Field5 a a (Maybe b) (Maybe b)
              => [a]
