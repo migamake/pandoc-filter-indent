@@ -6,6 +6,7 @@ build() {
   stack run text < test/example.json > out.json &&
   echo "Filter is ${FILTER_EXE}" &&
   pandoc -f json -t markdown  out.json -o out.md &&
+  pandoc              -t plain test/example.md -o out.txt     --filter "${FILTER_EXE}"                                          &&
   pandoc              -t html  test/example.md -o out.html    --filter "${FILTER_EXE}"                                          &&
   pandoc --standalone -t latex test/example.md -o out.tex     --filter "${FILTER_EXE}"                                          &&
   pandoc              -t pdf   test/example.md -o out.pdf     --filter "${FILTER_EXE}"                                          &&
