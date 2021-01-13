@@ -47,13 +47,11 @@ wrapTable cols txt =
            -- ,"\\setlength{\\tabcolsepBACKUP}{\\tabcolsep}"
             "\\setlength{\\tabcolsep}{1pt}\n"
           , "\\begin{tabular}{"
-          , T.replicate (cols+1+workaround) "l" -- FIXME: tests for correct number of columns
+          , T.replicate (cols+1) "l" -- FIXME: tests for correct number of columns
           , "}\n"
           , txt, "\n\\end{tabular}"
            --,"\\setlength{\\tabcolsep}{\\tabcolsepBACKUP}"
           ]
-  where
-    workaround = 0 -- temporary workaround for incorrect inference of number of columns
 
 -- Decrease column spacing: \\setlength{\\tabcolsep}{1ex}
 -- TODO: braced operators

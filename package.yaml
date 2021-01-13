@@ -12,7 +12,9 @@ description: |
   .
   > ```{.haskell}
   .
+  .
   Usage:
+  .
   > stack install pandoc-filter-indent
   > pandoc --filter pandoc-filter-indent -f input.md -o output.pdf
   > pandoc --filter pandoc-filter-indent -f input.md -o output.html
