@@ -3,6 +3,9 @@
 ## Unreleased changes
 ## Unreleased changes
 
+0.2.3.0 Jan 12 2020
+  - fixed minor issue that disabled inline rendering.
+
 0.2.2.0 Jan 12 2020
   - Fixed problem with declaring too few columns in LaTeX
   - Inline code formatting
