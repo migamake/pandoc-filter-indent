@@ -29,7 +29,7 @@ renderColSpan ([(TBlank, txt)], colSpan, AIndent) = -- indentation
     T.concat [ "\\multicolumn{",    T.pack $ show colSpan
                           , "}{p{", T.pack $ show $ T.length txt
                           , "ex}}{",  protectText txt
-                          , "}" ]
+                          , "\\,}" ]
 renderColSpan (toks, colSpan, alignment) =
     T.concat [ "\\multicolumn{",  T.pack $ show colSpan
                           , "}{", alignMark alignment
@@ -66,9 +66,8 @@ preformatTokens (a                                              :rest) =  a     
 --   Preprocesses then and calls `formatToken` for each.
 latexInline :: [(MyTok, Text)] -> Text
 latexInline  = T.concat
-              . fmap formatToken
-              . preformatTokens
-              -- . (\t -> trace ("Tokens: " <> show t) t) -- debug
+             . fmap formatToken
+             . preformatTokens
 
 -- Workaround with joinEscapedOperators til w consider spaces only.
 -- | Render a simple token.
@@ -143,6 +142,7 @@ formatToken (TOther,   "]"     ) = protectText "]"
 formatToken (TOther,   "["     ) = protectText "["
 formatToken (TOther,   "}"     ) = protectText "}"
 formatToken (TOther,   "{"     ) = protectText "{"
+-- formatToken (TBlank,   txt     ) = "\\textit{\\textcolor{gray}{" <> protectText txt <> "}}"
 formatToken (_,        txt     ) = "\\textit{"     <> protectText txt  <> "}"
 
 mathop :: Text -> Text

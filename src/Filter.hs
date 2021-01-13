@@ -25,14 +25,12 @@ renderBlock ::  Format     -- ^ Format string
             ->  Attr       -- ^ Attributes
             -> [Processed] -- ^ Data about alignment
             ->  Block
-renderBlock (Format "text" ) _attrs = RawBlock (Format "html" ) . T.pack . show . map (sum . map (\(_,c,_) -> c)) . colspans
---renderBlock (Format "text" ) attrs  = CodeBlock attrs           . Render.Debug.render
+--renderBlock (Format "text" ) _attrs = RawBlock (Format "html" ) . T.pack . show . colspans
+renderBlock (Format "text" ) attrs  = CodeBlock attrs           . Render.Debug.render
 renderBlock (Format "latex") _attrs = RawBlock (Format "latex") . processLatex
 renderBlock (Format "html" ) _attrs = RawBlock (Format "html" ) . processHTML
 -- Debugging option
 renderBlock other            attrs  = CodeBlock attrs           . T.pack . (show other <>) . show 
-
-sumColSpans = map (sum . map (\(_,c,_) -> c)) . colspans
 
 -- TODO: inline should strip colspans, and ignore table
 -- | Render a list of `Processed` token records into the target output format.
@@ -42,7 +40,7 @@ renderInline ::  Format     -- ^ Format string
              ->  Inline
 --render "text" attrs aligned = RawBlock (Format "latex") $ processLatex aligned -- debug
 renderInline (Format "text" ) attrs  = Code      attrs            . Render.Debug.renderInline
-renderInline (Format "latex") _attrs = RawInline (Format "latex") . Render.Latex.latexInline
+renderInline (Format "latex") _attrs = Math      InlineMath       . Render.Latex.latexInline
 renderInline (Format "html" ) _attrs = RawInline (Format "html" ) . Render.HTML.htmlInline
 -- Debugging option
 renderInline other            attrs  = Code      attrs            . T.pack . show

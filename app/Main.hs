@@ -17,10 +17,11 @@ import qualified Token.Haskell          (tokenizer)
 import           Filter                 (renderBlock, renderInline)
 import           FindColumns            (findColumns)
 import           Alignment              (Processed)
+import System.IO
 
 data Options = Options {
     inlineSyntax :: Text
-  }
+  } deriving (Show)
 
 main :: IO ()
 main = toJSONFilter runner
@@ -28,9 +29,10 @@ main = toJSONFilter runner
 -- | Main body of Pandoc filter.
 --   Reads format option, metadata,
 --   and calls `walk` with `blockFormatter`.
-runner :: Maybe Format -> Pandoc -> Pandoc
-runner (fromMaybe (Format "text") -> format) input@(Pandoc (Meta meta) _) =
-    walk (blockFormatter opts format) input
+runner :: Maybe Format -> Pandoc -> IO Pandoc
+runner (fromMaybe (Format "text") -> format) input@(Pandoc (Meta meta) _) = do
+    hPutStrLn stderr (show opts)
+    return $ walk (blockFormatter opts format) input
   where
     opts = case Map.lookup "inline-code" meta of
       Nothing                    -> Options "haskell" -- default
@@ -47,12 +49,12 @@ blockFormatter :: Options
                -> Format -- ^ Output format, defaults to "plain" if not found
                -> Block
                -> Block
-blockFormatter _opts format (CodeBlock attrs content) =
+blockFormatter _opts format (CodeBlock attrs content) = 
   case fmap findColumns $ getTokenizer attrs content of
     Just processed -> renderBlock format attrs processed
     Nothing        -> CodeBlock          attrs content -- fallback
 -- Do not touch other blocks than 'CodeBock'
-blockFormatter opts  format x                         =
+blockFormatter opts  format x                         = do
     walk (inlineFormatter opts format) x
 
 -- | Select the desired format output then process it.
@@ -63,8 +65,9 @@ inlineFormatter :: Options
                 -> Inline
                 -> Inline
 inlineFormatter Options {inlineSyntax} format (Code attrs txt) =
-    case getTokenizer attrs txt of
-      Just processed -> renderInline format attrs $ map discardLoc processed
+    case getTokenizer (addClass attrs) txt of
+      Just processed -> renderInline format attrs
+                      $ map discardLoc processed
       Nothing        -> Code                attrs txt -- fallback
   where
     discardLoc (a, _, b) = (a, b)
