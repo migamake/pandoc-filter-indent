@@ -14,7 +14,7 @@ import Prelude hiding(getLine)
 import FindColumns ( tableColumns )
 import Alignment ( Processed )
 import Token ( MyTok )
-import Render.ColSpan ( colspans )
+import Render.ColSpan ( colspans, numColSpans )
 import qualified Render.Debug
 import qualified Render.Latex
 import qualified Render.HTML
@@ -48,15 +48,10 @@ renderInline (Format "html" ) _attrs = RawInline (Format "html" ) . Render.HTML.
 renderInline other            attrs  = Code      attrs            . T.pack . show
 
 -- | Convert a list of input token records to raw LaTeX.
-processLatexInline :: [Processed] -> T.Text
-processLatexInline processed = Render.Latex.latexFromColSpans (max 1 $ length $ tableColumns processed)
-                             $ colspans processed
-
-
--- | Convert a list of input token records to raw LaTeX.
 processLatex :: [Processed] -> T.Text
-processLatex processed = Render.Latex.latexFromColSpans (max 1 $ length $ tableColumns processed)
-                       $ colspans processed
+processLatex processed = Render.Latex.latexFromColSpans (numColSpans processed) cs
+  where
+    cs = colspans processed
 
 -- | Convert a list of input token records to raw HTML.
 processHTML :: [Processed] -> T.Text

@@ -12,6 +12,7 @@ import Data.Text (Text)
 import Data.List(groupBy, sortBy)
 import Prelude hiding(getLine)
 import Optics.Core ( Field1(_1), Field2(_2), view, (%))
+import Control.Exception(assert)
 
 import Alignment
     ( textContent, tokenType, Align(ALeft), Processed )
@@ -48,6 +49,15 @@ colspans ps = fmap ( fmap extractTokens -- extract token and text content from e
     extractTokens (a,b,c) = (extractToken <$> a, b, c)
     extractToken tok = (view tokenType tok, view textContent tok)
 -- FIXME: split lines before colspans!
+
+numColSpans :: [Processed] -> Int
+numColSpans ps = case colspansPerLine of
+                   []   -> 1
+                   n:ns -> assert (all (n==) ns)
+                         $ n
+  where
+    colspansPerLine :: [Int]
+    colspansPerLine = map (sum . map (\(_,c,_) -> c)) . colspans $ ps
 
 -- | Given a `Processed` record, extract number of table columns.
 getAlignCol :: Processed -> Int
