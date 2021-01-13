@@ -1,13 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ViewPatterns      #-}
 -- | Render analyzed input into LaTeX table.
-module Render.Latex(latexFromColSpans) where
+module Render.Latex(latexFromColSpans, latexInline) where
 
 import Data.Text(Text)
 import qualified Data.Text as T
 import Text.LaTeX.Base.Syntax(protectText)
 
-import Alignment
+import Alignment ( Align(..) )
 import Render.Common(TokensWithColSpan)
 import Token(MyTok(..))
 import Util(unbrace)
@@ -33,7 +33,7 @@ renderColSpan ([(TBlank, txt)], colSpan, AIndent) = -- indentation
 renderColSpan (toks, colSpan, alignment) =
     T.concat [ "\\multicolumn{",  T.pack $ show colSpan
                           , "}{", alignMark alignment
-                          , "}{$", formatTokens toks
+                          , "}{$", latexInline toks
                           , "$}" ]
   where
     alignMark ACenter = "c"
@@ -63,10 +63,11 @@ preformatTokens []                                                     = []
 preformatTokens ((TOperator,"`"):(TVar, "elem"):(TOperator, "`"):rest) = (TOperator, "elem"):preformatTokens rest
 preformatTokens (a                                              :rest) =  a                 :preformatTokens rest
 
+
 -- | Format a list of tokens within a colspan.
 --   Preprocesses then and calls `formatToken` for each.
-formatTokens :: [(MyTok, Text)] -> Text
-formatTokens  = T.concat
+latexInline :: [(MyTok, Text)] -> Text
+latexInline  = T.concat
               . fmap formatToken
               . preformatTokens
               -- . (\t -> trace ("Tokens: " <> show t) t) -- debug
@@ -145,6 +146,8 @@ formatToken (TOther,   "}"     ) = protectText "}"
 formatToken (TOther,   "{"     ) = protectText "{"
 formatToken (_,        txt     ) = "\\textit{"     <> protectText txt  <> "}"
 
+mathop :: Text -> Text
 mathop code = "\\" <> code
 
+prologue :: Text
 prologue = T.concat ["\\usepackage{amssymb}"]

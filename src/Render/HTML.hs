@@ -1,13 +1,25 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ViewPatterns      #-}
 -- | Render analyzed tokens into HTML table.
-module Render.HTML(htmlFromColSpans) where
+module Render.HTML(htmlFromColSpans, htmlInline) where
 
 import Prelude hiding(span, id)
 import Data.Text(Text)
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as LT
-import Text.Blaze.Html5 hiding(style)
+import Text.Blaze.Html5
+    ( toHtml,
+      Html,
+      ToValue(toValue),
+      (!),
+      b,
+      html,
+      i,
+      span,
+      table,
+      tbody,
+      td,
+      tr )
 import Text.Blaze.Html5.Attributes(colspan, style, id)
 import Text.Blaze.Html.Renderer.Text(renderHtml)
 
@@ -51,9 +63,14 @@ renderColSpan (toks, colSpan, alignment) =
 
 -- TODO: braced operators
 -- | Given a list of tokens in a colspan, render HTML fragment.
+htmlInline :: [(MyTok, Text)] -> Text
+htmlInline  = LT.toStrict
+            . renderHtml
+            . formatTokens
+
 formatTokens :: [(MyTok, Text)] -> Html
-formatTokens  = mapM_ formatToken
-              . preformatTokens
+formatTokens = mapM_ formatToken
+             . preformatTokens
 
 -- | Format a single token as HTML fragment.
 formatToken :: (MyTok, Text) -> Html

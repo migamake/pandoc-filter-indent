@@ -36,46 +36,36 @@ runner (fromMaybe (Format "text") -> format) input@(Pandoc (Meta meta) _) =
       Just  otherValue           -> error $ "inline-code: meta should be a string but is: " <> show otherValue
 
 -- | Select the desired format output then process it.
-blockFormatter :: Options -> Format -> Block -> Block
+--   Run tokenizer, analysis, and formatter.
+--   Fallback to original input, if failed to tokenize.
+blockFormatter :: Options
+               -> Format -- ^ Output format, defaults to "plain" if not found
+               -> Block
+               -> Block
 blockFormatter _opts format (CodeBlock attrs content) =
-    codeFormatter blockRenderer format attrs content
+  case fmap findColumns $ getTokenizer attrs content of
+    Just processed -> renderBlock format attrs processed
+    Nothing        -> CodeBlock          attrs content -- fallback
 -- Do not touch other blocks than 'CodeBock'
 blockFormatter opts  format x                         =
     walk (inlineFormatter opts format) x
 
-inlineFormatter :: Options -> Format -> Inline -> Inline
-inlineFormatter  Options {inlineSyntax} format (Code    attrs txt    ) =
-    codeFormatter inlineRenderer format (addClass attrs) txt
-  where
-      addClass (a, classes, b) | inlineSyntax /= "" = (a, inlineSyntax:classes, b)
-      addClass  o                                   = o
-inlineFormatter _opts _       x                       = x
-
--- | Renderer for the correctly processed fragments.
-data Renderer a = Renderer {
-    renderSuccess  :: Format -> Attr -> [Processed] -> a
-  , renderFallback ::           Attr ->  Text       -> a
-  }
-
--- | Rendering inline elements
-inlineRenderer :: Renderer Inline
-inlineRenderer = Renderer renderInline Code
-
--- | Rendering block elements
-blockRenderer :: Renderer Block
-blockRenderer  = Renderer renderBlock  CodeBlock
-
--- | Run tokenizer, analysis, and formatter.
+-- | Select the desired format output then process it.
+--   Run tokenizer, and inline formatter.
 --   Fallback to original input, if failed to tokenize.
-codeFormatter :: Renderer a -- ^ Renderer to intended type
-              -> Format     -- ^ Output format, defaults to "text" if not found
-              -> Attr       -- ^ Code block attributes
-              -> Text       -- ^ Code block content
-              ->          a
-codeFormatter Renderer {..} format attrs content =
-  case fmap findColumns $ getTokenizer attrs content of
-    Just processed -> renderSuccess format attrs processed
-    Nothing        -> renderFallback       attrs content -- fallback
+inlineFormatter :: Options
+                -> Format -- ^ Output format, defaults to "plain" if not found
+                -> Inline
+                -> Inline
+inlineFormatter  Options {inlineSyntax} format (Code    attrs txt    ) =
+    case getTokenizer attrs txt of
+      Just processed -> renderInline format attrs $ map discardLoc processed
+      Nothing        -> Code                attrs txt -- fallback
+  where
+    discardLoc (a, _, b) = (a, b)
+    addClass (a, classes, b) | inlineSyntax /= "" = (a, inlineSyntax:classes, b)
+    addClass  o                                   = o
+inlineFormatter _opts _       x                       = x
 
 getTokenizer attrs | isHaskell attrs = Token.Haskell.tokenizer
                    | otherwise       = \_ -> Nothing

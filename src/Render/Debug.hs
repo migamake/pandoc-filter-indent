@@ -5,12 +5,12 @@
 {-# LANGUAGE FlexibleContexts      #-}
 -- | Renders alignment to text with alignment markers,
 --   for debugging purposes.
-module Render.Debug(render) where
+module Render.Debug(render, renderInline) where
 
 import Data.Text (Text)
 import qualified Data.Text as T
 import Prelude hiding(getLine)
-import Optics.Core ( view )
+import Optics.Core ( view, Field2(..))
 
 import FindColumns ( alignPos, getCol, tableColumns )
 import Alignment ( textContent, Align(..), Processed )
@@ -67,3 +67,6 @@ textWithMarkers tColumns nextCol tok =
                        | otherwise                   = id
     columnsBetween :: Int -> Int -> [Int]
     columnsBetween colA colB = filter (\c -> c >= colA && c < colB) tColumns
+
+renderInline :: Field2 a a Text Text => [a] -> Text
+renderInline = mconcat . map (view _2)
