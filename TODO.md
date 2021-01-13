@@ -1,4 +1,6 @@
 1. Distinguish tokens that make indent mark, and those that do not.
+   - (Add Bool for whether the token start should be treated as indent mark.)
+   - use text extract to decide fate of the token?
 2. Indent-only tokenizer.
 3. Tokenizers for other languages:
   - YAML: https://hackage.haskell.org/package/HsYAML-0.2.1.0/docs/Data-YAML-Token.html

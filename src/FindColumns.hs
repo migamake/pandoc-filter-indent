@@ -73,14 +73,15 @@ markBoundaries = map markIndent
                . blocks
                . sortBy (compare `on` getLine)
   where
-    getLine (tok, MyLoc line col, _, _) = line
+    getLine (tok, MyLoc line col _, _, _) = line
 
 -- | If first indented token is yet unmarked, mark it as boundary.
+--   FIXME: remove boundaries from not `mark`s.
 markIndent :: Aligned -> Aligned
-markIndent (TBlank, myLoc@(MyLoc _ 1  ), txt, Just indent, _) =
+markIndent (TBlank, myLoc@(MyLoc _ 1 _), txt, Just indent, _) =
            (TBlank, myLoc              , txt, Just indent, Just AIndent)
-markIndent (myTok,  myLoc@(MyLoc _ col), txt, Just indent, _) | indent == col =
-           (myTok,  myLoc              , txt, Just indent, Just ALeft)
+markIndent (myTok,  myLoc@(MyLoc _ col True), txt, Just indent, _) | indent == col =
+           (myTok,  myLoc                   , txt, Just indent, Just ALeft)
 markIndent other                                                               = other
 
 -- | Append alignment option to unanalyzed token record.
@@ -153,10 +154,11 @@ addLineIndent aLine = (`annex` indentColumn) <$> aLine
   where
     indentColumn :: Maybe Int
     indentColumn = extractColumn $ filter notBlank aLine
-    notBlank       (TBlank, _, _)               = False
-    notBlank        _                           = True
-    extractColumn  []                           = Nothing
-    extractColumn  ((_,   MyLoc line col, _):_) = Just col
+    notBlank       (TBlank, _, _)                 = False
+    notBlank        _                             = True
+    extractColumn  []                             = Nothing
+    extractColumn  ((_,   MyLoc line col _, _):_) = Just col
+    -- FIXME: is it only for `mark` columns?
 
 -- | Given a list of aligned records, and a list of marker columns,
 --   add table column indices to each record.

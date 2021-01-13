@@ -25,7 +25,7 @@ class Eq      a
   (>=)    :: a -> a -> Bool
 ```
 
-Another note on indent strucutre:
+Another note on indent structure:
 ```{.haskell}
 class Eq      a
    => Compare a where

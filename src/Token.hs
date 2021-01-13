@@ -4,19 +4,18 @@
 {-# LANGUAGE TemplateHaskell       #-}
 {-# LANGUAGE ViewPatterns          #-}
 -- | Common token representation used.
-module Token(MyTok(..), MyLoc(..), Tokenized, line, col, unwrap, unTikzMark) where
+module Token(MyTok(..), MyLoc(..), Tokenized, line, col, mark, unwrap, unTikzMark) where
 
-import           Data.Maybe(fromMaybe)
 import           Data.Text(Text)
 import qualified Data.Text as T
-import           Data.Tuple.Optics
 import           Optics.TH
 
 -- * Common tokens and locations
 --   We keep them here, so we can translate output from tokenizers to common format.
 -- | Location is just line and column (not a slice.)
-data MyLoc = MyLoc { _line :: Int -- ^ Line number starting from 1
-                   , _col  :: Int -- ^ Column number starting from 1
+data MyLoc = MyLoc { _line :: Int  -- ^ Line number starting from 1
+                   , _col  :: Int  -- ^ Column number starting from 1
+                   , _mark :: Bool -- ^ Is this a valid indent mark?
                    }
   deriving (Eq, Ord, Show)
 
@@ -32,7 +31,6 @@ data MyTok =
   | TNum
   | TOther
   | TTikz  Text -- TikZmark in a comment
-  | TMulti -- multi token
   deriving (Eq, Ord, Show)
 
 -- | Records tokenized and converted to common token format.
@@ -42,8 +40,8 @@ type Tokenized = (MyTok, MyLoc, Text)
 unTikzMark    :: Text -> Maybe Text
 unTikzMark txt =
   unwrap "{->" "-}" txt >>= \case
-    ""   -> Nothing
-    mark -> Just mark
+    ""    -> Nothing
+    aMark -> Just aMark
 
 -- | Given opening text, and closing text,
 --   check that input is "braced" by these, and strip them.

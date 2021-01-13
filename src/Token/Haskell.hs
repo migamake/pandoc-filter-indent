@@ -67,7 +67,7 @@ splitTokens = mconcat
             . fmap splitter
   where
     splitter :: (MyTok, MyLoc, Text) -> [(MyTok, MyLoc, Text)]
-    splitter (TBlank, loc@(MyLoc line _), txt) | T.filter (=='\n') txt /= "" =
+    splitter (TBlank, loc@(MyLoc line _ _), txt) | T.filter (=='\n') txt /= "" =
         withLocs withNewLines
       where
         split, withNewLines :: [Text]
@@ -78,9 +78,10 @@ splitTokens = mconcat
         withLocs (l:ls) = (TBlank, loc, l)
                         : zipWith mkEntry [line+1..] ls
         mkEntry :: Int -> Text -> (MyTok, MyLoc, Text)
-        mkEntry i t = (TBlank, MyLoc i 1, t)
+        mkEntry i t = (TBlank, MyLoc i 1 False, t)
     splitter  other             = [other]
 
+-- FIXME: use no-indent-mark instead.
 joinEscapedOperators :: (Eq c, IsString c, Semigroup c) => [(MyTok, b, c)] -> [(MyTok, b, c)]
 joinEscapedOperators ((TOther, loc, "("):(TOperator, _, op):(TOther, _, ")"):rest) =
    (TOperator, loc, "(" <> op <> ")"):joinEscapedOperators rest
@@ -101,13 +102,15 @@ joinEscapedOperators []         = []
 -- 2. Of the same length as number of tokens
 -- 3. With newlines should return line indices up to number of lines.
 -- 4. Same for a list of lists of words without newlines joined as lines
-restoreLocations :: [(a, Text)] -> [(a, MyLoc, Text)]
+restoreLocations :: [(MyTok, Text)] -> [(MyTok, MyLoc, Text)]
 restoreLocations = go 1 1
   where
     go line col []              = []
     go line col ((tok, txt):ls) =
-        (tok, MyLoc line col, txt):go newLine newCol ls
+        (tok, MyLoc line col (isMark tok), txt):go newLine newCol ls
       where
+        isMark TBlank = False
+        isMark _      = True
         newLine  = line + lineIncr
         lineIncr = T.length $ T.filter (=='\n') txt
         newCol  | lineIncr == 0 = col + T.length txt
