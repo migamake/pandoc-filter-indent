@@ -52,7 +52,7 @@ test = do
   (>>>)
   (+1)
   (+ alpha)
-   (//)
+  i  (//)
   <<
   <<<
   -<
@@ -74,6 +74,7 @@ test = do
   c
   d
   f <$> x <*> y
+  f "stringexample"
   eps
   TCons
   bot

@@ -47,6 +47,7 @@ renderColSpan (toks, colSpan, alignment) =
     alignStyle        = "text-align: " <> alignMark alignment
     alignMark ACenter = "center"
     alignMark ALeft   = "left"
+    alignMark AIndent = "left"
 
 -- TODO: braced operators
 -- | Given a list of tokens in a colspan, render HTML fragment.
