@@ -38,6 +38,7 @@ renderColSpan (toks, colSpan, alignment) =
   where
     alignMark ACenter = "c"
     alignMark ALeft   = "l"
+    alignMark AIndent = "l"
 
 -- | Wrap a LaTeX table content into \begin{tabular} environment.
 wrapTable :: Int -> Text -> Text
