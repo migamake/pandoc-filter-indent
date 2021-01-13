@@ -13,7 +13,7 @@ import qualified Data.Map  as Map
 import           Data.Text(Text)
 import qualified Data.Text as T
               
-import           Token.Haskell          (tokenizer)
+import qualified Token.Haskell          (tokenizer)
 import           Filter                 (renderBlock, renderInline)
 import           FindColumns            (findColumns)
 import           Alignment              (Processed)
@@ -25,6 +25,9 @@ data Options = Options {
 main :: IO ()
 main = toJSONFilter runner
 
+-- | Main body of Pandoc filter.
+--   Reads format option, metadata,
+--   and calls `walk` with `blockFormatter`.
 runner :: Maybe Format -> Pandoc -> Pandoc
 runner (fromMaybe (Format "text") -> format) input@(Pandoc (Meta meta) _) =
     walk (blockFormatter opts format) input
@@ -37,6 +40,8 @@ runner (fromMaybe (Format "text") -> format) input@(Pandoc (Meta meta) _) =
 
 -- | Select the desired format output then process it.
 --   Run tokenizer, analysis, and formatter.
+--
+--   For non-CodeBlocks it runs `inlineFormatter`.
 --   Fallback to original input, if failed to tokenize.
 blockFormatter :: Options
                -> Format -- ^ Output format, defaults to "plain" if not found
@@ -57,7 +62,7 @@ inlineFormatter :: Options
                 -> Format -- ^ Output format, defaults to "plain" if not found
                 -> Inline
                 -> Inline
-inlineFormatter  Options {inlineSyntax} format (Code    attrs txt    ) =
+inlineFormatter Options {inlineSyntax} format (Code attrs txt) =
     case getTokenizer attrs txt of
       Just processed -> renderInline format attrs $ map discardLoc processed
       Nothing        -> Code                attrs txt -- fallback
@@ -65,8 +70,9 @@ inlineFormatter  Options {inlineSyntax} format (Code    attrs txt    ) =
     discardLoc (a, _, b) = (a, b)
     addClass (a, classes, b) | inlineSyntax /= "" = (a, inlineSyntax:classes, b)
     addClass  o                                   = o
-inlineFormatter _opts _       x                       = x
+inlineFormatter _opts                  _      x                = x
 
+-- | Pick tokenizer depending on options.
 getTokenizer attrs | isHaskell attrs = Token.Haskell.tokenizer
                    | otherwise       = \_ -> Nothing
 

@@ -49,7 +49,7 @@ render ps = T.concat $ go ps
         alignMarker :: Text
         alignMarker  = case view alignPos tok of
                          Just (ACenter, _) -> "^"
-                         Just (ALeft,   _) -> "|"
+                         Just _            -> "|"
                          otherwise         -> ""
 
 -- | Text content with markers for markers inside it.
