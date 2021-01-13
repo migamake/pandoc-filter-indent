@@ -61,6 +61,7 @@ findColumns =
     . grouping getLine
 
 -- | Extract both line and column where a token starts.
+getLineCol :: Field2 a a MyLoc MyLoc => a -> (Int, Int)
 getLineCol x = (getLine x, getCol x)
 
 -- | Mark alignment boundaries.
@@ -92,11 +93,20 @@ withAlign  = flip annex
 --   check the alignment option that applies to this column.
 alignBlock :: [Unanalyzed] -> [Aligned]
 alignBlock [a]                            = withAlign  Nothing       <$> [a]
-alignBlock opList | all isOperator opList = withAlign (Just ACenter) <$> opList
+alignBlock opList | all isOperator (filter isMarked opList) =
+              withMarked (withAlign $ Just ACenter) opList
   where
     isOperator (TOperator, _,   _, _) = True
     isOperator  _                     = False
-alignBlock aList                          = withAlign (Just ALeft  ) <$> aList
+    isMarked (_, MyLoc _ _ True, _, _) = True
+    isMarked (_, _,              _, _) = False
+alignBlock aList                          =
+              withMarked (withAlign $ Just ALeft  ) aList
+
+withMarked f aList = apply <$> aList
+  where
+    apply entry@(view _2 -> MyLoc _ _ True) = f entry
+    apply entry                             = entry `annex` Nothing
 
 -- | Compute all alignment columns existing and their positions in the text column space.
 extraColumns :: Field2 a a  MyLoc         MyLoc

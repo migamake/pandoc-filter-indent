@@ -23,7 +23,7 @@ data Options = Options {
   }
 
 main :: IO ()
-main = toJSONFilter $ runner
+main = toJSONFilter runner
 
 runner :: Maybe Format -> Pandoc -> Pandoc
 runner (fromMaybe (Format "text") -> format) input@(Pandoc (Meta meta) _) =
