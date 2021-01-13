@@ -83,3 +83,16 @@ test = do
   |->
   \\
 ```
+
+Here is a problematic class instance:
+
+```{.haskell}
+instance LessArbitrary Value where
+  lessArbitrary = cheap $$$? genericLessArbitrary
+    where
+      cheap = LessArbitrary.oneof [
+                pure       Null
+              , Bool   <$> lessArbitrary
+              , Number <$> lessArbitrary
+              ]
+```

@@ -53,7 +53,7 @@ wrapTable cols txt =
            --,"\\setlength{\\tabcolsep}{\\tabcolsepBACKUP}"
           ]
   where
-    workaround = 10 -- temporary workaround for incorrect inference of number of columns
+    workaround = 0 -- temporary workaround for incorrect inference of number of columns
 
 -- Decrease column spacing: \\setlength{\\tabcolsep}{1ex}
 -- TODO: braced operators

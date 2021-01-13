@@ -49,13 +49,13 @@ renderInline other            attrs  = Code      attrs            . T.pack . sho
 
 -- | Convert a list of input token records to raw LaTeX.
 processLatexInline :: [Processed] -> T.Text
-processLatexInline processed = Render.Latex.latexFromColSpans (length $ tableColumns processed)
+processLatexInline processed = Render.Latex.latexFromColSpans (max 1 $ length $ tableColumns processed)
                              $ colspans processed
 
 
 -- | Convert a list of input token records to raw LaTeX.
 processLatex :: [Processed] -> T.Text
-processLatex processed = Render.Latex.latexFromColSpans (length $ tableColumns processed)
+processLatex processed = Render.Latex.latexFromColSpans (max 1 $ length $ tableColumns processed)
                        $ colspans processed
 
 -- | Convert a list of input token records to raw HTML.
