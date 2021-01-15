@@ -143,7 +143,8 @@ formatToken (TOther,   "["     ) = protectText "["
 formatToken (TOther,   "}"     ) = protectText "}"
 formatToken (TOther,   "{"     ) = protectText "{"
 -- formatToken (TBlank,   txt     ) = "\\textit{\\textcolor{gray}{" <> protectText txt <> "}}"
-formatToken (_,        txt     ) = "\\textit{"     <> protectText txt  <> "}"
+formatToken (TVar,        txt     ) = "\\textit{"     <> protectText txt  <> "}"
+formatToken (_,  txt     ) = "\\textrm{"     <> protectText txt  <> "}"
 
 mathop :: Text -> Text
 mathop code = "\\" <> code

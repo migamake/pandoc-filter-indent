@@ -30,6 +30,7 @@ data MyTok =
   | TVar
   | TNum
   | TOther
+  | TString
   | TTikz  Text -- TikZmark in a comment
   deriving (Eq, Ord, Show)
 

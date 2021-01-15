@@ -3,6 +3,9 @@
 ## Unreleased changes
 ## Unreleased changes
 
+0.3.1.0 Jan 15 2021
+  - Slightly improved formatting with SkyLighting and LaTeX
+
 0.3.0.0 Jan 15 2021
   - Support default syntaxes from skylighting.
 

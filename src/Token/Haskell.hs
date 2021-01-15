@@ -53,6 +53,8 @@ haskellTok VariableTok    = TVar
 haskellTok OperatorTok    = TOperator
 haskellTok RationalTok    = TNum
 haskellTok IntegerTok     = TNum
+haskellTok StringTok      = TString
+haskellTok CharTok        = TString
 haskellTok t              = TOther
 
 -- | Extract line number from `ghc-lib` slice location.
