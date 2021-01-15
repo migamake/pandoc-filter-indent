@@ -43,6 +43,7 @@ dependencies:
 - pandoc-types
 - optics-core
 - optics-th
+- skylighting
 
 library:
   source-dirs: src

@@ -96,3 +96,18 @@ instance LessArbitrary Value where
               , Number <$> lessArbitrary
               ]
 ```
+
+Example for JSON
+```{.json}
+{"a" : 0
+,"be": 1
+}
+```
+
+Example for YAML
+```{.yaml}
+yamly:
+  truthy:  true
+  falsy:   23.3
+  stringy: "string"
+```

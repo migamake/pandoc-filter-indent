@@ -14,6 +14,8 @@
 6. Support tikzmarks in HTML:
   - https://stackoverflow.com/questions/554167/drawing-arrows-on-an-html-page-to-visualize-semantic-links-between-textual-spans#623770
 7. Post-tokenization stage to preprocess operators.
+8. Prepend `header-includes`. (And document them.)
+9. Split shorter README and documentation?
 
 Simplifications proposed:
 * no need for tableColumns, just total colspans

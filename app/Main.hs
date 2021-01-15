@@ -14,6 +14,7 @@ import           Data.Text(Text)
 import qualified Data.Text as T
               
 import qualified Token.Haskell          (tokenizer)
+import qualified Token.Skylighting
 import           Filter                 (renderBlock, renderInline)
 import           FindColumns            (findColumns)
 import           Alignment              (Processed)
@@ -77,7 +78,9 @@ inlineFormatter _opts                  _      x                = x
 
 -- | Pick tokenizer depending on options.
 getTokenizer attrs | isHaskell attrs = Token.Haskell.tokenizer
-                   | otherwise       = \_ -> Nothing
+getTokenizer (_,classes,_) = case Token.Skylighting.lookupTokenizer classes of
+                               Just syntax -> Token.Skylighting.tokenizer syntax
+                               Nothing     -> \_ -> Nothing
 
 -- | Check if the code block is tagged as Haskell.
 isHaskell :: (Foldable t, Eq a1, IsString a1) =>
