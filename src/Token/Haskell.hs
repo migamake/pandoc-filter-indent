@@ -37,6 +37,8 @@ tokenizer  = fmap ( joinEscapedOperators
 --   and text content.
 --   Only TikZ marks are recognized by looking up text content.
 recognizeToken :: (Token, Text) -> (MyTok, Text)
+recognizeToken (SymbolTok,  "\\") = -- special treatment for lambda
+  (TOther,               "λ"    )
 recognizeToken (CommentTok, tokText@(unTikzMark -> Just mark)) =
   (TTikz mark,           tokText)
 recognizeToken (tokType, tokText) =

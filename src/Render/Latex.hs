@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ViewPatterns      #-}
 -- | Render analyzed input into LaTeX table.
-module Render.Latex(latexFromColSpans, latexInline) where
+module Render.Latex(latexFromColSpans, latexInline, latexPackages) where
 
 import Data.Text(Text)
 import qualified Data.Text as T
@@ -100,6 +100,7 @@ formatToken (TOperator,">>"    ) = mathop "gg"
 formatToken (TOperator,">>>"   ) = mathop "ggg"
 formatToken (TOperator,"<<"    ) = mathop "ll"
 formatToken (TOperator,"<<<"   ) = mathop "lll"
+formatToken (TOther,   "λ"     ) = mathop "lambda" -- Haskell only?
 --formatToken (TOperator,"-<"    ) = mathop "prec"
 formatToken (TOther,   "-<"    ) = mathop "prec"
 formatToken (TOther,   ">-"    ) = mathop "succ"
@@ -114,7 +115,7 @@ formatToken (TOther,   "->"    ) = mathop "to"
 formatToken (TOther,   "=>"    ) = mathop "Rightarrow"
 formatToken (TOperator,"==>"   ) = mathop "implies"
 formatToken (TOperator,"|->"   ) = mathop "mapsto"
---formatToken (TOperator,"|=>"   ) = mathop "Mapsto" -- not in amssymb
+formatToken (TOperator,"|=>"   ) = mathop "Mapsto" -- requires stmaryrd
 formatToken (TOperator,"<>"    ) = mathop "diamond"
 formatToken (TOperator,"<$>"   ) = mathop "mathbin{\\ooalign{\\raise.29ex\\hbox{$\\scriptscriptstyle\\$$}\\cr\\hss$\\!\\lozenge$\\hss}}"
 formatToken (TOperator,"<*>"   ) = mathop "mathbin{\\ooalign{\\raise.37ex\\hbox{$\\scriptscriptstyle{*}$}\\cr\\hss$\\!\\lozenge$\\hss}}"
@@ -130,7 +131,7 @@ formatToken (TVar    , kwd     ) = "\\emph{"       <> protectText kwd  <> "}"
 formatToken (TNum    , kwd     ) = protectText kwd 
 formatToken (TKeyword, kwd     ) = "\\textbf{"     <> protectText kwd  <> "}"
 formatToken (TCons,    cons    ) = "\\textsc{"     <> protectText cons <> "}"
-formatToken (TOperator,"\\"    ) = mathop "lambda"
+--formatToken (TOperator,"\\"    ) = mathop "lambda"
 formatToken (TTikz mark,_      ) = mathop $ "tikzMark{" <> mark <> "}"
 --formatToken (TOther,   "`"     ) = mathop "textasciigrave"
 formatToken (TOther,   "`"     ) = protectText "`"
@@ -151,3 +152,6 @@ mathop code = "\\" <> code
 
 prologue :: Text
 prologue = T.concat ["\\usepackage{amssymb}"]
+
+latexPackages :: [Text]
+latexPackages  = ["stmaryrd"]

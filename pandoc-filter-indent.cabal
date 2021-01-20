@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 54950c09cdef3ae347be5565c51f866814024d8f3304665a2873a0acdf7c41a2
+-- hash: 54d01b49a8b6f04c42145197372388471c0dc46ca4c7ca9623f6b08d2853cd25
 
 name:           pandoc-filter-indent
-version:        0.3.0.0
+version:        0.3.1.0
 synopsis:       Pandoc filter formatting Haskell code fragments using GHC lexer.
 description:    Formats marked code fragments, and allows `pandoc` to safely process rest of your literate program:
                 .
@@ -73,6 +73,7 @@ library
     , ghc-syntax-highlighter ==0.0.5.0
     , optics-core
     , optics-th
+    , pandoc-lens
     , pandoc-types
     , skylighting
     , text ==1.2.4.0
@@ -96,6 +97,7 @@ executable pandoc-filter-indent
     , optics-th
     , optparse-applicative
     , pandoc-filter-indent
+    , pandoc-lens
     , pandoc-types
     , skylighting
     , text ==1.2.4.0
@@ -119,6 +121,7 @@ test-suite pandoc-filter-indent-test
     , optics-core
     , optics-th
     , pandoc-filter-indent
+    , pandoc-lens
     , pandoc-types
     , quickcheck-text
     , skylighting

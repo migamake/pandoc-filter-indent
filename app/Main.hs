@@ -12,13 +12,14 @@ import           Data.Maybe             (fromMaybe)
 import qualified Data.Map  as Map
 import           Data.Text(Text)
 import qualified Data.Text as T
-              
+
 import qualified Token.Haskell          (tokenizer)
 import qualified Token.Skylighting
 import           Filter                 (renderBlock, renderInline)
 import           FindColumns            (findColumns)
 import           Alignment              (Processed)
-import System.IO
+import           Render.Latex           (latexPackages)
+import           System.IO
 
 data Options = Options {
     inlineSyntax :: Text
@@ -27,19 +28,41 @@ data Options = Options {
 main :: IO ()
 main = toJSONFilter runner
 
+-- https://www.logicmatters.net/latex-for-logicians/symbols/
+-- Just (MetaList [MetaBlocks [RawBlock (Format "tex") "\\usepackage{scalerel}"]])
+
 -- | Main body of Pandoc filter.
 --   Reads format option, metadata,
 --   and calls `walk` with `blockFormatter`.
 runner :: Maybe Format -> Pandoc -> IO Pandoc
-runner (fromMaybe (Format "text") -> format) input@(Pandoc (Meta meta) _) = do
-    hPutStrLn stderr (show opts)
-    return $ walk (blockFormatter opts format) input
+runner (fromMaybe (Format "text") -> format) input@(Pandoc (Meta meta) ast) = do
+    hPutStrLn stderr $ show opts
+    hPutStrLn stderr $ show $ Map.lookup "header-includes" meta
+    let top = if format == Format "latex"
+                 then Pandoc (Meta $ Map.alter modifyIncludes "header-includes" meta) ast
+                 else input
+    return $ walk (blockFormatter opts format) top
   where
+    -- | Check default syntax for inline code
     opts = case Map.lookup "inline-code" meta of
       Nothing                    -> Options "haskell" -- default
-      Just (MetaString       s)  -> Options s -- never needed?
-      Just (MetaInlines [Str s]) -> Options s
+      Just (MetaString       s ) -> Options  s -- never needed?
+      Just (MetaInlines [Str s]) -> Options  s
       Just  otherValue           -> error $ "inline-code: meta should be a string but is: " <> show otherValue
+
+-- | Add package dependencies to the meta "header-includes".
+modifyIncludes :: Maybe MetaValue -> Maybe MetaValue
+modifyIncludes = Just
+               . addTeXPackages latexPackages
+               . fromMaybe (MetaList [])
+  where
+    addTeXPackages :: [Text] -> MetaValue -> MetaValue
+    addTeXPackages = addTeXInclude
+                   . T.unlines
+                   . fmap (\name -> "\\usepackage{" <> name <> "}")
+    addTeXInclude :: Text -> MetaValue -> MetaValue
+    addTeXInclude rawTeX (MetaList ls) =
+      MetaList (MetaBlocks [RawBlock (Format "tex") rawTeX]:ls)
 
 -- | Select the desired format output then process it.
 --   Run tokenizer, analysis, and formatter.

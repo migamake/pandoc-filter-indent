@@ -38,6 +38,7 @@ Inline `<>` quote is here.
 ```{.haskell}
 test :: forall a. a -> b -> c -> d -> e
 test = do
+  (\x -> x)
   (>>=)
   x `elem` v
   (>=>)

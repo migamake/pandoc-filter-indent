@@ -41,6 +41,7 @@ dependencies:
 - blaze-markup
 - HaTeX
 - pandoc-types
+- pandoc-lens
 - optics-core
 - optics-th
 - skylighting
