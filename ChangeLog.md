@@ -1,7 +1,12 @@
 # Changelog for pandoc-filter-indent
 
 ## Unreleased changes
-## Unreleased changes
+
+  - lambda in Haskell tokenizer
+  - automatically append required LaTeX packages
+  - Mapsto for |=>
+
+## Release history
 
 0.3.1.0 Jan 15 2021
   - Slightly improved formatting with SkyLighting and LaTeX
@@ -15,7 +20,7 @@
 0.2.2.0 Jan 12 2021
   - Fixed problem with declaring too few columns in LaTeX
   - Inline code formatting
-  - Removed indent marks from parenthesised operators: "`(+)"
+  - Removed indent marks from parenthesised operators: "(+)"
   - Removed indent marks from functions promoted to operators like "`mappend`"
   - Fixed rendering of indent mark at the start of the column
 
