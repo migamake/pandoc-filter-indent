@@ -55,14 +55,17 @@ modifyIncludes :: Maybe MetaValue -> Maybe MetaValue
 modifyIncludes = Just
                . addTeXPackages latexPackages
                . fromMaybe (MetaList [])
+    -- Just (MetaBlocks [RawBlock (Format "tex") s])
   where
     addTeXPackages :: [Text] -> MetaValue -> MetaValue
     addTeXPackages = addTeXInclude
                    . T.unlines
                    . fmap (\name -> "\\usepackage{" <> name <> "}")
     addTeXInclude :: Text -> MetaValue -> MetaValue
-    addTeXInclude rawTeX (MetaList ls) =
-      MetaList (MetaBlocks [RawBlock (Format "tex") rawTeX]:ls)
+    addTeXInclude rawTeX (MetaList ls) = -- this variant is invalid for std templates
+      MetaList  $ MetaBlocks [RawBlock (Format "tex") rawTeX]:ls
+    addTeXInclude rawTeX (MetaBlocks [RawBlock "tex" s]) =
+      MetaBlocks [RawBlock "tex" $ mconcat [s, "\n", rawTeX]]
 
 -- | Select the desired format output then process it.
 --   Run tokenizer, analysis, and formatter.
