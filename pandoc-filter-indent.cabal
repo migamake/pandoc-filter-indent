@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 54d01b49a8b6f04c42145197372388471c0dc46ca4c7ca9623f6b08d2853cd25
+-- hash: 1d8f275838382e4b48fbe6b67fb6036026bdfd772402682271ab1034e1ae5201
 
 name:           pandoc-filter-indent
 version:        0.3.1.0
@@ -68,15 +68,14 @@ library
   build-depends:
       HaTeX
     , base >=4.7 && <5
-    , blaze-html ==0.9.1.2
+    , blaze-html
     , blaze-markup
-    , ghc-syntax-highlighter ==0.0.5.0
+    , ghc-syntax-highlighter
     , optics-core
     , optics-th
-    , pandoc-lens
     , pandoc-types
     , skylighting
-    , text ==1.2.4.0
+    , text
   default-language: Haskell2010
 
 executable pandoc-filter-indent
@@ -89,18 +88,17 @@ executable pandoc-filter-indent
   build-depends:
       HaTeX
     , base >=4.7 && <5
-    , blaze-html ==0.9.1.2
+    , blaze-html
     , blaze-markup
     , containers
-    , ghc-syntax-highlighter ==0.0.5.0
+    , ghc-syntax-highlighter
     , optics-core
     , optics-th
     , optparse-applicative
     , pandoc-filter-indent
-    , pandoc-lens
     , pandoc-types
     , skylighting
-    , text ==1.2.4.0
+    , text
   default-language: Haskell2010
 
 test-suite pandoc-filter-indent-test
@@ -115,15 +113,14 @@ test-suite pandoc-filter-indent-test
       HaTeX
     , QuickCheck
     , base >=4.7 && <5
-    , blaze-html ==0.9.1.2
+    , blaze-html
     , blaze-markup
-    , ghc-syntax-highlighter ==0.0.5.0
+    , ghc-syntax-highlighter
     , optics-core
     , optics-th
     , pandoc-filter-indent
-    , pandoc-lens
     , pandoc-types
     , quickcheck-text
     , skylighting
-    , text ==1.2.4.0
+    , text
   default-language: Haskell2010

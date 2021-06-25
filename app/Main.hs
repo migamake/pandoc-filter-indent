@@ -64,8 +64,11 @@ modifyIncludes = Just
     addTeXInclude :: Text -> MetaValue -> MetaValue
     addTeXInclude rawTeX (MetaList ls) = -- this variant is invalid for std templates
       MetaList  $ MetaBlocks [RawBlock (Format "tex") rawTeX]:ls
-    addTeXInclude rawTeX (MetaBlocks [RawBlock "tex" s]) =
+    addTeXInclude rawTeX (MetaBlocks [RawBlock "tex" s]) = -- pandoc-types<1.20
       MetaBlocks [RawBlock "tex" $ mconcat [s, "\n", rawTeX]]
+    addTeXInclude rawTeX (MetaBlocks [RawBlock "latex" s]) = -- pandoc-types>=1.22
+      MetaBlocks [RawBlock "tex" $ mconcat [s, "\n", rawTeX]]
+    addTeXInclude rawTeX other = error $ "Add a new case for addTeXInclude " <> show other
 
 -- | Select the desired format output then process it.
 --   Run tokenizer, analysis, and formatter.

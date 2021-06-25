@@ -35,13 +35,12 @@ extra-source-files:
 
 dependencies:
 - base >= 4.7 && < 5
-- ghc-syntax-highlighter == 0.0.5.0
-- text == 1.2.4.0
-- blaze-html == 0.9.1.2
+- ghc-syntax-highlighter
+- text
+- blaze-html
 - blaze-markup
 - HaTeX
 - pandoc-types
-- pandoc-lens
 - optics-core
 - optics-th
 - skylighting

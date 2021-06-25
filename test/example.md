@@ -1,8 +1,9 @@
 ---
 title: "Running example"
 author: "Michał J. Gajda"
-header-includes:
-  - \usepackage{scalerel}
+header-includes: |
+  \usepackage{scalerel}
+
 inline-code: "haskell"
 ---
 

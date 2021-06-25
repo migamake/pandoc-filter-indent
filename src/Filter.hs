@@ -26,9 +26,10 @@ renderBlock ::  Format     -- ^ Format string
             -> [Processed] -- ^ Data about alignment
             ->  Block
 --renderBlock (Format "text" ) _attrs = RawBlock (Format "html" ) . T.pack . show . colspans
-renderBlock (Format "text" ) attrs  = CodeBlock attrs           . Render.Debug.render
-renderBlock (Format "latex") _attrs = RawBlock (Format "latex") . processLatex
-renderBlock (Format "html" ) _attrs = RawBlock (Format "html" ) . processHTML
+renderBlock (Format "text" )  attrs  = CodeBlock attrs           . Render.Debug.render
+renderBlock (Format "latex")  _attrs = RawBlock (Format "latex") . processLatex
+renderBlock (Format "beamer") _attrs = RawBlock (Format "latex") . processLatex
+renderBlock (Format "html" )  _attrs = RawBlock (Format "html" ) . processHTML
 -- Debugging option
 renderBlock other            attrs  = CodeBlock attrs           . T.pack . (show other <>) . show 
 
