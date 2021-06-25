@@ -50,3 +50,9 @@ Found many issues in `pandoc-filter-indent`:
 14. Graying out comments
 15. Collapsing operators?
 16. Emphasising inline code to distinguish it from text (emph?)
+    Upright italic?
+    https://tex.stackexchange.com/questions/431740/upright-italics-math-mode
+    \usepacage{cfr-lm}
+    or
+    \usepackage{cm-unicode}
+    \newfontface\cmunui{CMU Serif Upright Italic}
