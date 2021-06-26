@@ -56,3 +56,5 @@ Found many issues in `pandoc-filter-indent`:
     or
     \usepackage{cm-unicode}
     \newfontface\cmunui{CMU Serif Upright Italic}
+17. Provide multipage listings
+18. Preserve spacing on copy&paste
