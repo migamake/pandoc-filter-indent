@@ -2,11 +2,14 @@
 
 ## Unreleased changes
 
-  - lambda in Haskell tokenizer
-  - automatically append required LaTeX packages
-  - Mapsto for |=>
-
 ## Release history
+
+0.3.2.0 Sep 29 2021
+  - stacked subscripts
+  - lambda in Haskell tokenizer
+  - greek letters for special variable names: eps, pi, rho
+  - automatically append required LaTeX packages (broken for Beamer output)
+  - Mapsto for |=>
 
 0.3.1.0 Jan 15 2021
   - Slightly improved formatting with SkyLighting and LaTeX
