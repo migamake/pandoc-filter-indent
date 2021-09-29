@@ -20,6 +20,7 @@ import           FindColumns            (findColumns)
 import           Alignment              (Processed)
 import           Render.Latex           (latexPackages)
 import           System.IO
+import Debug.Trace(trace)
 
 data Options = Options {
     inlineSyntax :: Text
@@ -38,7 +39,7 @@ runner :: Maybe Format -> Pandoc -> IO Pandoc
 runner (fromMaybe (Format "text") -> format) input@(Pandoc (Meta meta) ast) = do
     hPutStrLn stderr $ show opts
     hPutStrLn stderr $ show $ Map.lookup "header-includes" meta
-    let top = if format == Format "latex"
+    let top = if format `elem` [Format "latex", Format "tex"]
                  then Pandoc (Meta $ Map.alter modifyIncludes "header-includes" meta) ast
                  else input
     return $ walk (blockFormatter opts format) top
@@ -59,14 +60,16 @@ modifyIncludes = Just
   where
     addTeXPackages :: [Text] -> MetaValue -> MetaValue
     addTeXPackages = addTeXInclude
-                   . T.unlines
+                   . T.unlines  
                    . fmap (\name -> "\\usepackage{" <> name <> "}")
     addTeXInclude :: Text -> MetaValue -> MetaValue
     addTeXInclude rawTeX (MetaList ls) = -- this variant is invalid for std templates
       MetaList  $ MetaBlocks [RawBlock (Format "tex") rawTeX]:ls
     addTeXInclude rawTeX (MetaBlocks [RawBlock "tex" s]) = -- pandoc-types<1.20
+      trace ("adding pandoc-types<1.20 (" <> T.unpack rawTeX <> ")") $
       MetaBlocks [RawBlock "tex" $ mconcat [s, "\n", rawTeX]]
     addTeXInclude rawTeX (MetaBlocks [RawBlock "latex" s]) = -- pandoc-types>=1.22
+      trace ("adding pandoc-types<1.20 (" <> T.unpack rawTeX <> ")") $
       MetaBlocks [RawBlock "tex" $ mconcat [s, "\n", rawTeX]]
     addTeXInclude rawTeX other = error $ "Add a new case for addTeXInclude " <> show other
 
@@ -103,13 +106,13 @@ inlineFormatter Options {inlineSyntax} format (Code attrs txt) =
     discardLoc (a, _, b) = (a, b)
     addClass (a, classes, b) | inlineSyntax /= "" = (a, inlineSyntax:classes, b)
     addClass  o                                   = o
-inlineFormatter _opts                  _      x                = x
+inlineFormatter _opts                  _      x   = x
 
 -- | Pick tokenizer depending on options.
 getTokenizer attrs | isHaskell attrs = Token.Haskell.tokenizer
-getTokenizer (_,classes,_) = case Token.Skylighting.lookupTokenizer classes of
-                               Just syntax -> Token.Skylighting.tokenizer syntax
-                               Nothing     -> \_ -> Nothing
+getTokenizer (_,classes,_)           = case Token.Skylighting.lookupTokenizer classes of
+                                         Just syntax -> Token.Skylighting.tokenizer syntax
+                                         Nothing     -> \_ -> Nothing
 
 -- | Check if the code block is tagged as Haskell.
 isHaskell :: (Foldable t, Eq a1, IsString a1) =>

@@ -1,16 +1,18 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ViewPatterns      #-}
 -- | Render analyzed input into LaTeX table.
-module Render.Latex(latexFromColSpans, latexInline, latexPackages) where
+module Render.Latex(latexFromColSpans, latexInline, latexPackages, subscripts) where
 
-import Data.Text(Text)
+import           Data.Text(Text)
 import qualified Data.Text as T
-import Text.LaTeX.Base.Syntax(protectText)
+import           Data.Char(isAlpha)
 
-import Alignment ( Align(..) )
-import Render.Common(TokensWithColSpan)
-import Token(MyTok(..))
-import Util(unbrace)
+import           Text.LaTeX.Base.Syntax(protectText)
+
+import           Alignment ( Align(..) )
+import           Render.Common(TokensWithColSpan)
+import           Token(MyTok(..))
+import           Util(unbrace)
 
 -- | Given a number of table columns,
 --   and a list of lists of colspans for each table row,
@@ -69,6 +71,18 @@ latexInline  = T.concat
              . fmap formatToken
              . preformatTokens
 
+-- | Add subscripts and superscripts to variable names.
+--   `_` is subscript, and `__` is superscript.vim 
+subscripts :: Text -> Text
+subscripts ""  = " "
+subscripts "_" = "\\_"
+subscripts t   = segments t
+  where
+    segments = foldr1 addSubscript . T.splitOn "_"
+    -- | Tags the second argument with superscript "^" or subscript "_"
+    addSubscript :: Text -> Text -> Text
+    addSubscript t tsub = mconcat [t, "\\textsubscript{", tsub, "}"]
+
 -- Workaround with joinEscapedOperators til w consider spaces only.
 -- | Render a simple token.
 formatToken :: (MyTok, Text) -> Text
@@ -116,7 +130,7 @@ formatToken (TOther,   "->"    ) = mathop "to"
 formatToken (TOther,   "=>"    ) = mathop "Rightarrow"
 formatToken (TOperator,"==>"   ) = mathop "implies"
 formatToken (TOperator,"|->"   ) = mathop "mapsto"
-formatToken (TOperator,"|=>"   ) = mathop "Mapsto" -- requires stmaryrd
+--formatToken (TOperator,"|=>"   ) = mathop "Mapsto" -- requires stmaryrd
 formatToken (TOperator,"<>"    ) = mathop "diamond"
 formatToken (TOperator,"<$>"   ) = mathop "mathbin{\\ooalign{\\raise.29ex\\hbox{$\\scriptscriptstyle\\$$}\\cr\\hss$\\!\\lozenge$\\hss}}"
 formatToken (TOperator,"<*>"   ) = mathop "mathbin{\\ooalign{\\raise.37ex\\hbox{$\\scriptscriptstyle{*}$}\\cr\\hss$\\!\\lozenge$\\hss}}"
@@ -132,10 +146,11 @@ formatToken (TVar,     "n"     ) = mathop "nu"
 formatToken (TVar,     "m"     ) = mathop "mu"
 formatToken (TVar,     "s"     ) = mathop "sigma"
 formatToken (TVar,     "o"     ) = mathop "omega"
-formatToken (TVar    , kwd     ) = "\\emph{"       <> protectText kwd  <> "}"
+formatToken (TVar    , txt     ) | T.any isAlpha txt = "\\textit{" <> subscripts txt <> "}"
+formatToken (TVar,     txt     ) = "\\textit{"     <> protectText txt  <> "}"
 formatToken (TNum    , kwd     ) = protectText kwd 
 formatToken (TKeyword, kwd     ) = "\\textbf{"     <> protectText kwd  <> "}"
-formatToken (TCons,    cons    ) = "\\textsc{"     <> protectText cons <> "}"
+formatToken (TCons,    cons    ) = "\\textsc{"     <> subscripts cons <> "}"
 --formatToken (TOperator,"\\"    ) = mathop "lambda"
 formatToken (TTikz mark,_      ) = mathop $ "tikzMark{" <> mark <> "}"
 --formatToken (TOther,   "`"     ) = mathop "textasciigrave"
@@ -148,9 +163,8 @@ formatToken (TOther,   "]"     ) = protectText "]"
 formatToken (TOther,   "["     ) = protectText "["
 formatToken (TOther,   "}"     ) = protectText "}"
 formatToken (TOther,   "{"     ) = protectText "{"
--- formatToken (TBlank,   txt     ) = "\\textit{\\textcolor{gray}{" <> protectText txt <> "}}"
-formatToken (TVar,        txt     ) = "\\textit{"     <> protectText txt  <> "}"
-formatToken (_,  txt     ) = "\\textrm{"     <> protectText txt  <> "}"
+-- formatToken (TBlank,   txt  ) = "\\textit{\\textcolor{gray}{" <> protectText txt <> "}}"
+formatToken (_,  txt           ) = "\\textrm{"     <> protectText txt  <> "}"
 
 mathop :: Text -> Text
 mathop code = "\\" <> code
@@ -159,4 +173,4 @@ prologue :: Text
 prologue = T.concat ["\\usepackage{amssymb}"]
 
 latexPackages :: [Text]
-latexPackages  = ["stmaryrd"]
+latexPackages  = ["amssymb", "amsmath", "stmaryrd"]

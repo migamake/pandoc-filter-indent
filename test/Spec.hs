@@ -2,6 +2,7 @@
 -- | Test suite
 module Main where
 
+import           Control.Exception(assert)
 import           Data.Text.Arbitrary
 import           Test.QuickCheck
 import qualified Data.Text as T
@@ -13,10 +14,12 @@ import Token(MyTok(..)
             ,MyLoc(..)
             ,Tokenized)
 import Token.Haskell(tokenizer)
+import Render.Latex(subscripts)
 import qualified Render.Debug
 import FindColumns
 import Render.ColSpan
 import Alignment(Processed)
+import GHC.Stack
 
 prop_tokenizer str = case tokenizer str of
                        Nothing -> label "cannot lex" $ True
@@ -67,15 +70,24 @@ prop_tableColumns input = T.any (not . Data.Char.isSpace) input ==>
     sameNumber [] = True
     sameNumber (n:ns) = all (n==) ns
 
+shouldBe :: (HasCallStack, Eq a) => a -> a -> IO ()
+a `shouldBe` b = do
+  if a /= b 
+    then error "Inequal"
+    else return ()
+
 main :: IO ()
 main = do
-  problem " a\na"
-  problem "--"
-  problem "a\n a"
-  quickCheck   prop_tokenizer
-  quickCheck   prop_debug_renderer_text_length
-  quickCheck $ withMaxSuccess 10000  prop_colspans -- is it sufficient?
-  quickCheck $ withMaxSuccess 100000 prop_tableColumns -- is it sufficient?
+    (subscripts "alpha_beta")        `shouldBe` ("alpha\\textsubscript{beta}")
+    (subscripts "alpha__beta")       `shouldBe` ("alpha\\textsuperscript{beta}")
+    (subscripts "alpha__gamma_beta") `shouldBe` ("alpha\\textsuperscript{gamma\\textsubscript{beta}}")
+    problem " a\na"
+    problem "--"
+    problem "a\n a"
+    quickCheck   prop_tokenizer
+    quickCheck   prop_debug_renderer_text_length
+    quickCheck $ withMaxSuccess 10000  prop_colspans -- is it sufficient?
+    quickCheck $ withMaxSuccess 100000 prop_tableColumns -- is it sufficient?
   where
     problem example = do
       putStrLn $ "Example: " <> show example

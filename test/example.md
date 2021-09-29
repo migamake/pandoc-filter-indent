@@ -3,6 +3,9 @@ title: "Running example"
 author: "Michał J. Gajda"
 header-includes: |
   \usepackage{scalerel}
+  \usepackage{stmaryrd}
+  \usepackage{amsmath}
+  \usepackage{amssymb}
 
 inline-code: "haskell"
 ---
@@ -84,6 +87,8 @@ test = do
   |=>
   |->
   \\
+  f_subscript
+  f_a_b
 ```
 
 Here is a problematic class instance:
@@ -101,8 +106,8 @@ instance LessArbitrary Value where
 
 Example for JSON
 ```{.json}
-{"a" : 0
-,"be": 1
+{ "a" : 0
+, "be": 1
 }
 ```
 
