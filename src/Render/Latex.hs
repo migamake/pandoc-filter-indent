@@ -72,7 +72,7 @@ latexInline  = T.concat
              . preformatTokens
 
 -- | Add subscripts and superscripts to variable names.
---   `_` is subscript, and `__` is superscript.vim 
+--   "_" is subscript, and "__" is superscript.vim 
 subscripts :: Text -> Text
 subscripts ""  = " "
 subscripts "_" = "\\_"

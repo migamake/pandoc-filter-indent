@@ -23,9 +23,12 @@ import qualified Skylighting.Core      as Sky(lookupSyntax, syntaxByShortName)
 
 import Token ( MyLoc(MyLoc), MyTok(..), unTikzMark, mark )
 
+rightToMaybe :: Either a b -> Maybe b
 rightToMaybe (Left  err   ) = Nothing
 rightToMaybe (Right result) = Just result
 
+-- | Looks up the tokenizer from Skylighting preset library by the short name of the language.
+--   Picks the first match.
 lookupTokenizer :: [Text] -> Maybe Syntax
 lookupTokenizer  = listToMaybe
                  . catMaybes
@@ -55,30 +58,30 @@ recognizeTokens  = map $ map $ first skyTok
 
 -- | Convert token type of `ghc-lib` into tokens recognized by the filter.
 skyTok :: TokenType -> MyTok
-skyTok FloatTok  = TNum
-skyTok DecValTok  = TNum
-skyTok BaseNTok  = TNum
-skyTok StringTok = TString
-skyTok CharTok = TString
-skyTok FunctionTok = TVar
-skyTok AttributeTok = TBlank
+skyTok FloatTok          = TNum
+skyTok DecValTok         = TNum
+skyTok BaseNTok          = TNum
+skyTok StringTok         = TString
+skyTok CharTok           = TString
+skyTok FunctionTok       = TVar
+skyTok AttributeTok      = TBlank
 skyTok VerbatimStringTok = TString
-skyTok SpecialStringTok = TCons
-skyTok ConstantTok = TCons
-skyTok KeywordTok = TKeyword
-skyTok BuiltInTok = TKeyword
-skyTok PreprocessorTok = TBlank
-skyTok CommentTok = TBlank
-skyTok DocumentationTok = TBlank
-skyTok CommentTok = TBlank
-skyTok OperatorTok = TOperator
-skyTok SpecialCharTok = TOperator
-skyTok RegionMarkerTok = TOperator
-skyTok AnnotationTok = TBlank
-skyTok ControlFlowTok = TKeyword
-skyTok VariableTok = TVar
-skyTok DataTypeTok = TCons
-skyTok other     = TOther
+skyTok SpecialStringTok  = TCons
+skyTok ConstantTok       = TCons
+skyTok KeywordTok        = TKeyword
+skyTok BuiltInTok        = TKeyword
+skyTok PreprocessorTok   = TBlank
+skyTok CommentTok        = TBlank
+skyTok DocumentationTok  = TBlank
+skyTok CommentTok        = TBlank
+skyTok OperatorTok       = TOperator
+skyTok SpecialCharTok    = TOperator
+skyTok RegionMarkerTok   = TOperator
+skyTok AnnotationTok     = TBlank
+skyTok ControlFlowTok    = TKeyword
+skyTok VariableTok       = TVar
+skyTok DataTypeTok       = TCons
+skyTok other             = TOther
 
 -- FIXME: generalize for GHC tokenizer and Skylighting
 -- | Restore locations

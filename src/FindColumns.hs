@@ -26,15 +26,15 @@ import Debug.Trace
 
 -- | Records tokenized and converted to common token format.
 type Unanalyzed = (MyTok, MyLoc, Text
-                  , Maybe Int -- ^ Indent for entire line
+                  , Maybe Int -- Indent for entire line
                   )
 
 -- | Records aligned, but without column numbers yet.
-type Aligned   = (MyTok       -- ^ token type
-                 ,MyLoc       -- ^ text start location
-                 ,Text        -- ^ text content
-                 ,Maybe Int   -- ^ indent in this column
-                 ,Maybe Align -- ^ alignment
+type Aligned   = (MyTok       -- token type
+                 ,MyLoc       -- text start location
+                 ,Text        -- text content
+                 ,Maybe Int   -- indent in this column
+                 ,Maybe Align -- alignment
                  )
 
 -- * Definitions of fields accessible at many stages

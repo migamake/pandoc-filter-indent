@@ -78,9 +78,9 @@ a `shouldBe` b = do
 
 main :: IO ()
 main = do
-    (subscripts "alpha_beta")        `shouldBe` ("alpha\\textsubscript{beta}")
-    (subscripts "alpha__beta")       `shouldBe` ("alpha\\textsuperscript{beta}")
-    (subscripts "alpha__gamma_beta") `shouldBe` ("alpha\\textsuperscript{gamma\\textsubscript{beta}}")
+    (subscripts "alpha_beta")        `shouldBe` "alpha\\textsubscript{beta}"
+    (subscripts "alpha__beta")       `shouldBe` "alpha\\textsuperscript{beta}"
+    (subscripts "alpha__gamma_beta") `shouldBe` "alpha\\textsuperscript{gamma\\textsubscript{beta}}"
     problem " a\na"
     problem "--"
     problem "a\n a"

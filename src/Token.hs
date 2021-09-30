@@ -8,7 +8,7 @@ module Token(MyTok(..), MyLoc(..), Tokenized, line, col, mark, unwrap, unTikzMar
 
 import           Data.Text(Text)
 import qualified Data.Text as T
-import           Optics.TH
+import           Optics.TH ( makeLenses )
 
 -- * Common tokens and locations
 --   We keep them here, so we can translate output from tokenizers to common format.
@@ -23,21 +23,21 @@ makeLenses ''MyLoc
 
 -- | Token just classifies to blank, operator, and the style class
 data MyTok =
-    TBlank
-  | TOperator
-  | TKeyword
-  | TCons
-  | TVar
-  | TNum
-  | TOther
-  | TString
-  | TTikz  Text -- TikZmark in a comment
+    TBlank      -- ^ Whitespace or comments
+  | TOperator   -- ^ Operators
+  | TKeyword    -- ^ Language-specific keywords
+  | TCons       -- ^ Constructors
+  | TVar        -- ^ Variables, function names
+  | TNum        -- ^ Numbers
+  | TOther      -- ^ Other tokens
+  | TString     -- ^ String constants
+  | TTikz  Text -- ^ TikZmark in a comment
   deriving (Eq, Ord, Show)
 
 -- | Records tokenized and converted to common token format.
-type Tokenized = (MyTok -- ^ Token type
-                 ,MyLoc -- ^ Starting location for the token
-                 ,Text  -- ^ text value of the token
+type Tokenized = (MyTok -- Token type
+                 ,MyLoc -- Starting location for the token
+                 ,Text  -- text value of the token
                  )
 
 -- | Unpack a Haskell comment with a TikZ mark indicator.
