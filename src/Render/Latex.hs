@@ -137,6 +137,8 @@ formatToken (TOperator,"<*>"   ) = mathop "mathbin{\\ooalign{\\raise.37ex\\hbox{
 formatToken (TOperator,"elem"  ) = mathop "in"
 formatToken (TOperator,"~"     ) = mathop "sim"
 formatToken (TOperator,"~="    ) = mathop "approx"
+formatToken (TOperator,"><"    ) = mathop "times"
+formatToken (TOperator,":->"   ) = mathop "longmapsto"
 formatToken (TVar,     "a"     ) = mathop "alpha"
 formatToken (TVar,     "b"     ) = mathop "beta"
 formatToken (TVar,     "c"     ) = mathop "gamma"

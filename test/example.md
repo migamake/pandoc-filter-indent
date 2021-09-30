@@ -86,6 +86,8 @@ test = do
   undefined
   |=>
   |->
+  :->
+  ><
   \\
   f_subscript
   f_a_b

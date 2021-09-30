@@ -2,6 +2,9 @@
 
 ## Unreleased changes
 
+  - >< as Cartesian product (\times)
+  - :-> as \longmapsto
+
 ## Release history
 
 0.3.2.0 Sep 29 2021
