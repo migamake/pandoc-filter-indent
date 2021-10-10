@@ -19,6 +19,7 @@
 7. Post-tokenization stage to preprocess operators.
 [+] 8. Prepend `header-includes`. (And document them.)
 9. Split shorter README and documentation?
+10. alpha beta gamma etc. only in type variables
 
 Simplifications proposed:
 * no need for tableColumns, just total colspans
