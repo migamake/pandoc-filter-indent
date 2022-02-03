@@ -20,6 +20,7 @@
 [+] 8. Prepend `header-includes`. (And document them.)
 9. Split shorter README and documentation?
 10. alpha beta gamma etc. only in type variables
+11. Make indent live when line ends early, but not at the first character?
 
 Simplifications proposed:
 * no need for tableColumns, just total colspans
