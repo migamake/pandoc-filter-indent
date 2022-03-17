@@ -1,13 +1,11 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.33.0.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
---
--- hash: 1d8f275838382e4b48fbe6b67fb6036026bdfd772402682271ab1034e1ae5201
 
 name:           pandoc-filter-indent
-version:        0.3.2.0
+version:        0.3.3.0
 synopsis:       Pandoc filter formatting Haskell code fragments using GHC lexer.
 description:    Formats marked code fragments, and allows `pandoc` to safely process rest of your literate program:
                 .

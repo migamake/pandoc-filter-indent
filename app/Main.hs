@@ -36,10 +36,12 @@ main = toJSONFilter runner
 --   Reads format option, metadata,
 --   and calls `walk` with `blockFormatter`.
 runner :: Maybe Format -> Pandoc -> IO Pandoc
-runner (fromMaybe (Format "text") -> format) input@(Pandoc (Meta meta) ast) = do
+runner (fromMaybe (Format "text") -> format) input@(Pandoc (Meta meta) ast) =
+  do
+    hPutStrLn stderr $ "Output format: " <> show format
     hPutStrLn stderr $ show opts
     hPutStrLn stderr $ show $ Map.lookup "header-includes" meta
-    let top = if format `elem` [Format "latex", Format "tex"]
+    let top = if format `elem` [Format "latex", Format "tex", Format "beamer"]
                  then Pandoc (Meta $ Map.alter modifyIncludes "header-includes" meta) ast
                  else input
     return $ walk (blockFormatter opts format) top
