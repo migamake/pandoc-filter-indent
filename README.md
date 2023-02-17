@@ -314,7 +314,7 @@ depending on type of the symbol.
 
 | Input token      | \LaTeX{} code | Rendering       |
 |:-----------------|:--------------|:---------------:|
-| `Operator "="`   | `\scalebox{1.7}[1]{=}`     | $\scalebox{1.7}[1]{=}$ |
+| `Operator "="`   | `\scalebox{1.7}[1]{=}`     | ＝ |
 | `Operator "<>"`  | `\diamond`    | $\diamond{}$    |
 | `Operator ">="`  | `\geq`        | $\geq{}$        |
 | `Operator "<="`  | `\geq`        | $\leq{}$        |
