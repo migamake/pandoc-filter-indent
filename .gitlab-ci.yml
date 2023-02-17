@@ -1,0 +1,48 @@
+stages:
+  - test
+  - deploy
+
+variables:
+  STACK_ROOT: "$CI_PROJECT_DIR/.stack"
+  CABAL_STORE_DIR: "$CI_PROJECT_DIR/.cabal-store"
+  DOCKER_REGISTRY: "hub.docker.com/migamake/pandoc-filter-indent"
+
+cache:
+  key: "ALL"
+  paths:
+    - .stack-work/
+    - .stack/
+    - .cabal-store/
+    - dist-newstyle/
+
+shellcheck-bash-scripts:
+  stage: test
+  script:
+    - ./ci/scripts_shellcheck.sh
+
+build-haskell-stack:
+  stage: test
+  tags:
+    - docker
+  image: fpco/stack-build:lts-18.12
+  script:
+    - stack build
+    - stack test
+
+docker-image:
+  stage: deploy
+  image: docker
+  tags: [docker]
+  before_script:
+    - docker login -u ${DOCKER_REGISTRY_USER} -p ${DOCKER_REGISTRY_PASSWORD} ${DOCKER_REGISTRY}
+  script: |
+    docker build -t "$DOCKER_REGISTRY":${CI_COMMIT_SHORT_SHA} .
+    docker push "$DOCKER_REGISTRY":${CI_COMMIT_SHORT_SHA}
+    if [ -z "${CI_MERGE_REQUEST_ID}" ] ; then
+      docker tag "$DOCKER_REGISTRY":${CI_COMMIT_SHORT_SHA} "$DOCKER_REGISTRY":latest
+      docker push "$DOCKER_REGISTRY":latest
+    fi
+  services:
+    - docker:20.10.10-dind
+  cache: []
+
