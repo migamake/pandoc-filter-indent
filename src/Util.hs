@@ -53,6 +53,8 @@ safeTail (_:ls) = ls
 unbrace txt | T.head txt == '(' && T.last txt == ')' && T.length txt > 2 = Just $ T.tail $ T.init txt
 unbrace _ = Nothing
 
+brace txt = mconcat ["(", txt, ")"]
+
 -- | Preprocess tokens before formatting
 --   in order to detect tokens like functions converted to operator syntax.
 --   These are merged into a single token.

@@ -60,7 +60,7 @@ wrapTable cols txt =
 -- | Preprocesses functions converted to operator syntax and joins them into a single token.
 -- FIXME: deduplicate
 preformatTokens []                                                     = []
-preformatTokens ((TOperator,"`"):(TVar, "elem"):(TOperator, "`"):rest) = (TOperator, "elem"):preformatTokens rest
+preformatTokens ((TOther, "`"):(TVar, "elem"):(TOther, "`"):rest) = (TOperator, "elem"):preformatTokens rest
 preformatTokens (a                                              :rest) =  a                 :preformatTokens rest
 
 
@@ -154,7 +154,7 @@ formatToken (TVar,     "tau"   ) = mathop "tau"
 formatToken (TVar,     "rho"   ) = mathop "rho"
 formatToken (TVar    , txt     ) | T.any isAlpha txt = "\\textit{" <> subscripts txt <> "}"
 formatToken (TVar,     txt     ) = "\\textit{"     <> protectText txt  <> "}"
-formatToken (TNum    , kwd     ) = protectText kwd 
+formatToken (TNum    , kwd     ) = protectText kwd
 formatToken (TKeyword, kwd     ) = "\\textbf{"     <> protectText kwd  <> "}"
 formatToken (TCons,    cons    ) = "\\textsc{"     <> subscripts cons <> "}"
 --formatToken (TOperator,"\\"    ) = mathop "lambda"
@@ -169,6 +169,8 @@ formatToken (TOther,   "]"     ) = protectText "]"
 formatToken (TOther,   "["     ) = protectText "["
 formatToken (TOther,   "}"     ) = protectText "}"
 formatToken (TOther,   "{"     ) = protectText "{"
+--formatToken (TOther,   "="     ) = "\\scalebox{1.7}{" <> mathop "=" <> "}"
+formatToken (TOther,   "="     ) = "=\\joinrel="
 -- formatToken (TBlank,   txt  ) = "\\textit{\\textcolor{gray}{" <> protectText txt <> "}}"
 formatToken (_,  txt           ) = "\\textrm{"     <> protectText txt  <> "}"
 
