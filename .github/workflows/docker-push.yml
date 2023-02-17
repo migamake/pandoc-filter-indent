@@ -19,7 +19,6 @@ env:
 
 jobs:
   build-and-push-image:
-    runs-on: fpco/stack-build:lts-18.12
     permissions:
       contents: read
       packages: write
