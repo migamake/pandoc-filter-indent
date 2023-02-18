@@ -323,6 +323,7 @@ depending on type of the symbol.
 | `Operator "\/"`  | `\ne`         | $\bigvee{}$     |
 | `Operator "/\"`  | `\ne`         | $\bigwedge{}$   |
 | `Operator "."`   | `\cdot`       | $\cdot$         |
+| `Operator ".."`  | `\cdots`       | $\cdots$         |
 | `Operator "elem"`| `\in`         | $\in$            |
 | `Operator ">>"`  | `\gg`         | $\gg$            |
 | `Operator "<<"`  | `\ll`         | $\ll$            |
@@ -332,7 +333,7 @@ depending on type of the symbol.
 | `Operator ">>>"` | `\ggg`            | $\ggg{}$         |
 | `Operator "<<<"` | `\lll`            | $\lll{}$         |
 | `Operator "||"`  | `\parallel`       | $\parallel{}$         |
-| `Operator ">>="` | `\ne`             | $\gg\joinrel=$         |
+| `Operator ">>="` | `\gg\joinrel=`             | $\gg\joinrel=$         |
 | `Operator "|>"`  | `\triangleright`  | $\triangleright{}$ |
 | `Operator "-<"`  | `\prec`           | $\prec{}$       |
 | `Operator "<-"`  | `\gets`           | $\gets{}$       |
