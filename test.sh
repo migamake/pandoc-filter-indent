@@ -30,7 +30,7 @@ build() {
   cat out.md
 }
 
-build
+build || exit 1
 if [ "$1" == "--watch" ]; then 
   while inotifywait -e modify,move src/*.hs app/*.hs src/*/*.hs test/*.md; do
     build ${NAME};
