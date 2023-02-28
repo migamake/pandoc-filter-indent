@@ -91,6 +91,10 @@ test = do
   \\
   f_subscript
   f_a_b
+  /|\
+  /||\
+  \||/
+  \|/
 ```
 
 Here is a problematic class instance:

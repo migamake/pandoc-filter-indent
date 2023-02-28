@@ -330,6 +330,7 @@ depending on type of the symbol.
 | `Operator "~="`  | `\approx`     | $\approx$          |
 | `Operator "~"`   | `\sim`             |   $\sim$          |
 | `Operator "<->"` | `\leftrightarrow` | $\leftrightarrow{}$         |
+| `Operator "<|>"` | `\updownarrow`    | $\updownarrow{}$            |
 | `Operator ">>>"` | `\ggg`            | $\ggg{}$         |
 | `Operator "<<<"` | `\lll`            | $\lll{}$         |
 | `Operator "||"`  | `\parallel`       | $\parallel{}$         |
